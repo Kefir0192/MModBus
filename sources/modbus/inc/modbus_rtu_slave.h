@@ -1,0 +1,5 @@
+#ifndef MODBUS_RTU_SLAVE
+#define MODBUS_RTU_SLAVE
+
+#endif // MODBUS_RTU_SLAVE
+
