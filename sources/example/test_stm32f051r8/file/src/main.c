@@ -13,6 +13,7 @@ void Hardware_Init(void)
     Oscillator_Init();
     // Initialization GPIO
     Port_Init();
+    __enable_irq();
 }
 
 //------------------------------------------------------
