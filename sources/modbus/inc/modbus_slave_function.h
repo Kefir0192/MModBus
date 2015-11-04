@@ -1,0 +1,6 @@
+#ifndef MODBUS_FUNCTION
+#define MODBUS_FUNCTION
+
+
+#endif // MODBUS_FUNCTION
+

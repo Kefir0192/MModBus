@@ -37,11 +37,16 @@ MModBus_p_modbus_I= \
 
 MModBus_inc= \
 	$(MModBus_p_modbus_inc)crc16.h \
+	$(MModBus_p_modbus_inc)modbus_code_function.h \
+	$(MModBus_p_modbus_inc)modbus_slave_registers.h \
+	$(MModBus_p_modbus_inc)modbus_slave_function.h \
 	$(MModBus_p_modbus_inc)modbus_rtu_master.h \
 	$(MModBus_p_modbus_inc)modbus_rtu_slave.h
 	
 MModBus_opj= \
 	crc16.o \
+	modbus_slave_registers.o \
+	modbus_slave_function.o \
 	modbus_rtu_master.o \
 	modbus_rtu_slave.o
 
@@ -49,6 +54,12 @@ MModBus_opj= \
 
 crc16.o: $(MModBus_p_modbus_src)crc16.c $(MModBus_inc)
 	$(CC) $(COMPILOP) -c $(MModBus_p_modbus_src)crc16.c -o crc16.o
+
+modbus_slave_registers.o: $(MModBus_p_modbus_src)modbus_slave_registers.c $(MModBus_inc)
+	$(CC) $(COMPILOP) -c $(MModBus_p_modbus_src)modbus_slave_registers.c -o modbus_slave_registers.o
+
+modbus_slave_function.o: $(MModBus_p_modbus_src)modbus_slave_function.c $(MModBus_inc)
+	$(CC) $(COMPILOP) -c $(MModBus_p_modbus_src)modbus_slave_function.c -o modbus_slave_function.o
 	
 modbus_rtu_master.o: $(MModBus_p_modbus_src)modbus_rtu_master.c $(MModBus_inc)
 	$(CC) $(COMPILOP) -c $(MModBus_p_modbus_src)modbus_rtu_master.c -o modbus_rtu_master.o
