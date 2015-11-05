@@ -2,7 +2,7 @@
 #define MODBUS_CODE_FUNCTION
 
 // Function Codes
-enum {
+enum MB_FC {
     MB_FC_READ_COILS        = 0x01, // Read Coils (Output) Status 0xxxx
     MB_FC_READ_INPUT_STAT   = 0x02, // Read Input Status (Discrete Inputs) 1xxxx
     MB_FC_READ_REGS         = 0x03, // Read Holding Registers 4xxxx
@@ -23,7 +23,7 @@ enum {
 };
 
 // Exception Codes
-enum {
+enum MB_EX {
     MB_EX_ILLEGAL_FUNCTION = 0x01, // Function Code not Supported
     MB_EX_ILLEGAL_ADDRESS  = 0x02, // Output Address not exists
     MB_EX_ILLEGAL_VALUE    = 0x03, // Output Value not in Range

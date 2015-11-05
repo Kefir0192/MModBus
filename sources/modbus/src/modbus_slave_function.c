@@ -1,86 +1,135 @@
 #include "globalincludefile.h"
+#include "modbus_code_function.h"
 #include "modbus_slave_registers.h"
 #include "modbus_slave_function.h"
 
-// Чтение значений из нескольких регистров флагов.
+
+
 //------------------------------------------------------
-uint8_t ModBus_0x01_Read_Coils(uint8_t *pTxBuff, uint8_t *pRxBuff);
-// Чтение значений из нескольких дискретных входов
-//------------------------------------------------------
-uint8_t ModBus_0x02_Read_Input_Status(void);
 // Чтение значений из нескольких регистров хранения
 //------------------------------------------------------
-uint8_t ModBus_0x03_Read_Registers(void);
+uint8_t ModBus_0x03_Read_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint16_t *pRxBuff, uint16_t *pTxBuff)
+{
+    ///	Чтение регистров
+    //	Запрос:
+    //	+---0---+----1----+-------------------2-------------------+-------------------3-------------------+-----------------------4---------------------+----------------------5----------------------+---6---+---7---+
+    //	| Адрес | Функция | Начальный номер регистра старший байт | Начальный номер регистра младший байт | Количество регистров в блоке (старший байт) | Количество регистров в блоке (младший байт) | CRC_L | CRC_H |
+    //	+-------+---------+---------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+-------+-------+
+    //	Ответ:
+    //	+---0---+----1----+---------------2----------------+-------------3------------+-------------4------------+---5---+---6---+
+    //	| Адрес | Функция | Количество байт — регистры * 2 | Ррегистра (старший байт) | Ррегистра (младший байт) | CRC_L | CRC_H |
+    //	+-------+---------+--------------------------------+--------------------------+--------------------------+-------+-------+
+
+    // Количество регистров в блоке
+    uint16_t number_registers = MODBUS_SLAVE_FUNCTION_NUMBER_REGISTERS(pRxBuff);
+    // Для начала проверим не выходит ли значение за диапазон
+    // 0x03 — Величина, содержащаяся в поле данных запроса, является недопустимой величиной
+    if(number_registers >= 126) return ModBus_Exception_Response(pRxBuff, pTxBuff, MB_EX_ILLEGAL_VALUE);
+
+    // Адрес
+    uint16_t starting_register_number = MODBUS_SLAVE_FUNCTION_STARTING_REGISTER_NUMBER(pRxBuff);
+    *(pTxBuff + 2 )	= number_registers * 2;
+
+    for(uint8_t counter = 0; counter < number_registers; counter++) {
+        MODBUS_SLAVE_FUNCTION_REGISTER_SET(pTxBuff, starting_register_number + counter, ReadModBusReg(pRegmap, number_registers + counter));
+    }
+    return (number_registers * 2) + 3;
+}
+
+//------------------------------------------------------
 // Чтение значений из нескольких регистров ввода
 //------------------------------------------------------
-uint8_t ModBus_0x04_Read_Input_Registers(void);
-// Запись значения одного флага
+uint8_t ModBus_0x04_Read_Input_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint16_t *pRxBuff, uint16_t *pTxBuff)
+{
+    ///	Чтение регистров
+    //	Запрос:
+    //	+---0---+----1----+-------------------2-------------------+-------------------3-------------------+-----------------------4---------------------+----------------------5----------------------+---6---+---7---+
+    //	| Адрес | Функция | Начальный номер регистра старший байт | Начальный номер регистра младший байт | Количество регистров в блоке (старший байт) | Количество регистров в блоке (младший байт) | CRC_L | CRC_H |
+    //	+-------+---------+---------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+-------+-------+
+    //	Ответ:
+    //	+---0---+----1----+---------------2----------------+-------------3------------+-------------4------------+---5---+---6---+
+    //	| Адрес | Функция | Количество байт — регистры * 2 | Ррегистра (старший байт) | Ррегистра (младший байт) | CRC_L | CRC_H |
+    //	+-------+---------+--------------------------------+--------------------------+--------------------------+-------+-------+
+
+    // Количество регистров в блоке
+    uint16_t number_registers = MODBUS_SLAVE_FUNCTION_NUMBER_REGISTERS(pRxBuff);
+    // Для начала проверим не выходит ли значение за диапазон
+    // 0x03 — Величина, содержащаяся в поле данных запроса, является недопустимой величиной
+    if(number_registers >= 126) return ModBus_Exception_Response(pRxBuff, pTxBuff, MB_EX_ILLEGAL_VALUE);
+    // Адрес
+    uint16_t starting_register_number = MODBUS_SLAVE_FUNCTION_STARTING_REGISTER_NUMBER(pRxBuff);
+
+    *(pTxBuff + 2 )	= number_registers * 2;
+
+    for(uint8_t counter = 0; counter < number_registers; counter++) {
+        MODBUS_SLAVE_FUNCTION_REGISTER_SET(pTxBuff, starting_register_number + counter, ReadModBusReg(pRegmap, starting_register_number + counter));
+    }
+    return (number_registers * 2) + 3;
+}
+
 //------------------------------------------------------
-uint8_t ModBus_0x05_Write_Single_Coil(void);
 // Запись значения в один регистр хранения
 //------------------------------------------------------
-uint8_t ModBus_0x06_Write_Single_Register(void);
-// Запись значений в несколько регистров флагов
+uint8_t ModBus_0x06_Write_Single_Register(struct modbus_slave_unique_registers_map *pRegmap, uint16_t *pRxBuff, uint16_t *pTxBuff)
+{
+    uint8_t offset = 0;
+
+    return offset;
+}
+
 //------------------------------------------------------
-uint8_t ModBus_0x0F_Write_Multiple_Coils(void);
 // Запись значений в несколько регистров хранения
 //------------------------------------------------------
-uint8_t ModBus_0x10_Write_Multiple_Registers(void);
+uint8_t ModBus_0x10_Write_Multiple_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint16_t *pRxBuff, uint16_t *pTxBuff)
+{
+    ///	Запись регистров
+    //	Запрос:
+    //	+---0---+----1----+-------------------2-------------------+-------------------3-------------------+-----------------------4---------------------+----------------------5----------------------+----------------6---------------+-------------7------------+--------------8-----------+---9---+---10--+
+    //	| Адрес | Функция | Начальный номер регистра старший байт | Начальный номер регистра младший байт | Количество регистров в блоке (старший байт) | Количество регистров в блоке (младший байт) | Количество байт — регистры * 2 | Ррегистра (старший байт) | Ррегистра (младший байт) | CRC_L | CRC_H |
+    //	+-------+---------+---------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+--------------------------------+--------------------------+--------------------------+-------+-------+
+    //	Ответ:
+    //	+---0---+----1----+-------------------2-------------------+-------------------3-------------------+-----------------------4---------------------+----------------------5----------------------+---6---+---7---+
+    //	| Адрес | Функция | Начальный номер регистра старший байт | Начальный номер регистра младший байт | Количество регистров в блоке (старший байт) | Количество регистров в блоке (младший байт) | CRC_L | CRC_H |
+    //	+-------+---------+---------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+-------+-------+
 
+    // Количество регистров в блоке
+    uint16_t number_registers = MODBUS_SLAVE_FUNCTION_NUMBER_REGISTERS(pRxBuff);
+    // Для начала проверим не выходит ли значение за диапазон
+    // 0x03 — Величина, содержащаяся в поле данных запроса, является недопустимой величиной
+    if(number_registers >= 126) return ModBus_Exception_Response(pRxBuff, pTxBuff, MB_EX_ILLEGAL_VALUE);
+    // Адрес
+    uint16_t starting_register_number = MODBUS_SLAVE_FUNCTION_STARTING_REGISTER_NUMBER(pRxBuff);
 
+    for(uint8_t counter = 0; counter < number_registers; counter++) {
+        WrightModBusReg(pRegmap, MODBUS_SLAVE_FUNCTION_REGISTER_GET(pRxBuff, counter), starting_register_number + counter);
+    }
 
-
-
+    return 6;
+}
 
 // Ответить исключением
 //------------------------------------------------------
-uint8_t ModBus_Exception_Response(void);
+uint8_t ModBus_Exception_Response(uint16_t *pRxBuff, uint16_t *pTxBuff, uint8_t Exception)
+{
+    uint8_t offset = 0;
+
+    return offset;
+}
+
+
+
 
 /*
-switch (fcode) {
-
-    case MB_FC_WRITE_REG:
-        //field1 = reg, field2 = value
-        this->writeSingleRegister(field1, field2);
-    break;
-
-    case MB_FC_READ_REGS:
-        //field1 = startreg, field2 = numregs
-        this->readRegisters(field1, field2);
-    break;
-
-    case MB_FC_WRITE_REGS:
-        //field1 = startreg, field2 = status
-        this->writeMultipleRegisters(frame,field1, field2, frame[5]);
-    break;
-
-    #ifndef USE_HOLDING_REGISTERS_ONLY
-    case MB_FC_READ_COILS:
-        //field1 = startreg, field2 = numregs
-        this->readCoils(field1, field2);
-    break;
-
-    case MB_FC_READ_INPUT_STAT:
-        //field1 = startreg, field2 = numregs
-        this->readInputStatus(field1, field2);
-    break;
-
-    case MB_FC_READ_INPUT_REGS:
-        //field1 = startreg, field2 = numregs
-        this->readInputRegisters(field1, field2);
-    break;
-
-    case MB_FC_WRITE_COIL:
-        //field1 = reg, field2 = status
-        this->writeSingleCoil(field1, field2);
-    break;
-
-    case MB_FC_WRITE_COILS:
-        //field1 = startreg, field2 = numoutputs
-        this->writeMultipleCoils(frame,field1, field2, frame[5]);
-    break;
-
-    #endif
-    default:
-        this->exceptionResponse(fcode, MB_EX_ILLEGAL_FUNCTION);
+// Чтение значений из нескольких регистров флагов.
+//------------------------------------------------------
+uint8_t ModBus_0x01_Read_Coils(void);
+// Чтение значений из нескольких дискретных входов
+//------------------------------------------------------
+uint8_t ModBus_0x02_Read_Input_Status(void);
+// Запись значения одного флага
+//------------------------------------------------------
+uint8_t ModBus_0x05_Write_Single_Coil(void);
+// Запись значений в несколько регистров флагов
+//------------------------------------------------------
+uint8_t ModBus_0x0F_Write_Multiple_Coils(void);
 */

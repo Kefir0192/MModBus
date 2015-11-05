@@ -1,5 +1,7 @@
 #include "globalincludefile.h"
+#include "modbus_code_function.h"
 #include "modbus_slave_registers.h"
+#include "modbus_slave_function.h"
 
 
 
@@ -36,7 +38,7 @@ void WrightModBusReg(struct modbus_slave_unique_registers_map *pRegmap, uint16_t
 
     uint8_t i;
     // Перебераем подмассивы
-    for (i = 0; i < pRegmap->NumSubArray; i++) {
+    for(i = 0; i < pRegmap->NumSubArray; i++) {
         // Проверяем в какой подмассив попадаем
         if ((Address >= pRegmap->pHeaders[i].START_ADDR) && (Address <= pRegmap->pHeaders[i].FINISH_ADDR)) {
             // Теперь проверяем спецификатор доступа (туда писать то разрешено вообще али нет) применив нотацию Йоды
@@ -62,7 +64,7 @@ uint16_t ReadModBusReg(struct modbus_slave_unique_registers_map *pRegmap, uint16
 
     uint8_t i;
     // Перебераем подмассивы
-    for (i = 0; i < pRegmap->NumSubArray; i++) {
+    for(i = 0; i < pRegmap->NumSubArray; i++) {
         // Проверяем в какой подмассив попадаем
         if ((Address >= pRegmap->pHeaders[i].START_ADDR) && (Address <= pRegmap->pHeaders[i].FINISH_ADDR)) {
             // Определяем из какого места в локальном подмассиве надо прочитать и четаем
