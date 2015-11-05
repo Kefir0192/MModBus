@@ -25,24 +25,20 @@
  *  4)  SIZE_ARRx = FINISH_ADDRx - START_ADDRx Размер подмассива, где x-порядковый номер подмассива
  * */
 
+
+
+#define MODBUS_SLAVE_REGISTERS_SIZE_ARRAY(FINISH_ADDR, START_ADDR) (((FINISH_ADDR) - (START_ADDR) + 1))
+
+
+
 // Доступ к регистрам
-#define ACCESS_REG_RW       0x00    // а) RW - Регистры доступные для чтения и записи
-#define ACCESS_REG_RO       0x01    // б) RO - Регистры доступные только для чтения
-#define ACCESS_REG_NOTRW    0x02    // в) Не доступно ни чтение не запись
+enum ACCESS {
+    ACCESS_REG_RW       = 0x00, // а) RW - Регистры доступные для чтения и записи
+    ACCESS_REG_RO       = 0x01, // б) RO - Регистры доступные только для чтения
+    ACCESS_REG_NOTRW    = 0x02  // в) Не доступно ни чтение не запись
+};
 
-#define NUMSUBARRAY 2               // Число подмассивов
 
-// Массив0 действительных регистров - Данные о состоянии датчиков в упакованном формате
-#define ACCESS0             ACCESS_REG_RW
-#define START_ADDR0         0x00
-#define FINISH_ADDR0        0x02
-#define SIZE_ARR0           ((FINISH_ADDR0) - (START_ADDR0) + 1)
-
-// Массив1 действительных регистров - Данные аналоговых значений поступающие с датчиков с адресами 001 - 126
-#define ACCESS1             ACCESS_REG_RW
-#define START_ADDR1         0x03
-#define FINISH_ADDR1        0x05
-#define SIZE_ARR1           ((FINISH_ADDR1) - (START_ADDR1) + 1)
 
 // Это заголовок для каждого подмассива (header)
 // Размер массива равен числу заведенных ModBus-ов
@@ -54,32 +50,37 @@ struct modbus_slave_registers_subarray {
         uint16_t *psubarray;        // Указатель на подмассив для которого будет сделан этот заголовок
 };
 
-// Структура карты регистров
-struct modbus_slave_registers_map {
-        struct modbus_slave_registers_subarray headers[NUMSUBARRAY];
-        uint16_t subarray0[SIZE_ARR0];  // подмассив регистров ModBus №1
-        uint16_t subarray1[SIZE_ARR1];  // подмассив регистров ModBus №2
+// Уникальная карта регистров для каждого экземпляра modbus_slave
+struct modbus_slave_unique_registers_map {
+    struct modbus_slave_registers_subarray *pHeaders;// Указатель на массив карт регистров
+    uint8_t	NumSubArray;                             // Число подмассивов карт регистров
 };
 
-// Объявление глобального массива состоящего из заголовков подмассивов ModBus
-// (которые содержат в себе указатели на существующие подмассивы)
-extern struct modbus_slave_registers_map modbus_global_register_map;
+
+// Создать уникальную карту регистров
+//-----------------------------------------------------
+void ModBus_Slave_Creat_Unique_Reg_Map(
+    struct modbus_slave_registers_subarray *pHeaders, // Указатель на массив карт регистров
+    uint16_t *psubarray,     // Указатель на подмассив регистров (uint16_t)
+    uint8_t  ACCESS,         // Доступ к регистрам
+    uint16_t START_ADDR,     // Стартовый адрес
+    uint16_t FINISH_ADDR);   // Конечный адрес
 
 // Инициализация карты регистров
 //------------------------------------------------------
 void ModBusRTU_Registers_Init(void);
 // Функция записи одного регистра ModBus с проверкой возможности записи
-// *pRegmap - экземпляр карты регистров с которым ведется работа в конкретном случае (их же может быть не один штук)
+// *pRegmap - экземпляр уникальной карты регистров с которым ведется работа в конкретном случае (их же может быть не один штук)
 // DataReg - собственно значение полученного по сети записываемого или запрошенного по сети читаемого регистра ModBus
 // Address - ModBus адрес этого регистра (не путать с локальным адресом ячейки памяти)
 //------------------------------------------------------
-void WrightModBusReg(struct modbus_slave_registers_subarray *pRegmap, uint16_t DataReg, uint16_t Address);
+void WrightModBusReg(struct modbus_slave_unique_registers_map *pRegmap, uint16_t DataReg, uint16_t Address);
 // Функция поиска заданного регистра ModBus и последующего чтения
-// *pRegmap - экземпляр карты регистров с которым ведется работа в конкретном случае
+// *pRegmap - экземпляр уникальной карты регистров с которым ведется работа в конкретном случае
 // Address - ModBus адрес этого регистра (не путать с локальным адресом ячейки памяти)
 // возвращаемое значение - требуемое значение регистра ModBus
 //------------------------------------------------------
-uint16_t ReadModBusReg(struct modbus_slave_registers_subarray *pRegmap, uint16_t Address);
+uint16_t ReadModBusReg(struct modbus_slave_unique_registers_map *pRegmap, uint16_t Address);
 
 #endif // MODBUS_RTU_REGISTERS
 

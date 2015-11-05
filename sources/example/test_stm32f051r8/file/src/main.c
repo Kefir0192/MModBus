@@ -1,6 +1,9 @@
 #include "globalincludefile.h"
 #include "main.h"
 #include "phisic.h"
+#include "modbus_rtu_slave.h"
+#include "modbus_slave_registers.h"
+#include "modbus_slave_function.h"
 
 
 
