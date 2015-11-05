@@ -33,6 +33,8 @@ uint8_t ModBus_0x03_Read_Registers(struct modbus_slave_unique_registers_map *pRe
     for(uint8_t counter = 0; counter < number_registers; counter++) {
         MODBUS_SLAVE_FUNCTION_REGISTER_SET(pRxTxBuff, starting_register_number + counter, ReadModBusReg(pRegmap, number_registers + counter));
     }
+
+    // return offset
     return (number_registers * 2) + 3;
 }
 
@@ -64,6 +66,8 @@ uint8_t ModBus_0x04_Read_Input_Registers(struct modbus_slave_unique_registers_ma
     for(uint8_t counter = 0; counter < number_registers; counter++) {
         MODBUS_SLAVE_FUNCTION_REGISTER_SET(pRxTxBuff, starting_register_number + counter, ReadModBusReg(pRegmap, starting_register_number + counter));
     }
+
+    // return offset
     return (number_registers * 2) + 3;
 }
 
@@ -74,6 +78,7 @@ uint8_t ModBus_0x06_Write_Single_Register(struct modbus_slave_unique_registers_m
 {
     uint8_t offset = 0;
 
+    // return offset
     return offset;
 }
 
@@ -104,6 +109,7 @@ uint8_t ModBus_0x10_Write_Multiple_Registers(struct modbus_slave_unique_register
         WrightModBusReg(pRegmap, MODBUS_SLAVE_FUNCTION_REGISTER_GET(pRxTxBuff, counter), starting_register_number + counter);
     }
 
+    // return offset
     return 6;
 }
 
@@ -111,9 +117,10 @@ uint8_t ModBus_0x10_Write_Multiple_Registers(struct modbus_slave_unique_register
 //------------------------------------------------------
 uint8_t ModBus_Exception_Response(uint16_t *pRxTxBuff, uint8_t Exception)
 {
-    uint8_t offset = 0;
+    *(pRxTxBuff + 1 ) = Exception; *(pRxTxBuff + 2 ) = Exception;
 
-    return offset;
+    // return offset
+    return 3;
 }
 
 
