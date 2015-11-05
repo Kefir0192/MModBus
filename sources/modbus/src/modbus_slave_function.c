@@ -8,7 +8,7 @@
 //------------------------------------------------------
 // Чтение значений из нескольких регистров хранения
 //------------------------------------------------------
-uint8_t ModBus_0x03_Read_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint16_t *pRxBuff, uint16_t *pTxBuff)
+uint8_t ModBus_0x03_Read_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint16_t *pRxTxBuff)
 {
     ///	Чтение регистров
     //	Запрос:
@@ -21,17 +21,17 @@ uint8_t ModBus_0x03_Read_Registers(struct modbus_slave_unique_registers_map *pRe
     //	+-------+---------+--------------------------------+--------------------------+--------------------------+-------+-------+
 
     // Количество регистров в блоке
-    uint16_t number_registers = MODBUS_SLAVE_FUNCTION_NUMBER_REGISTERS(pRxBuff);
+    uint16_t number_registers = MODBUS_SLAVE_FUNCTION_NUMBER_REGISTERS(pRxTxBuff);
     // Для начала проверим не выходит ли значение за диапазон
     // 0x03 — Величина, содержащаяся в поле данных запроса, является недопустимой величиной
-    if(number_registers >= 126) return ModBus_Exception_Response(pRxBuff, pTxBuff, MB_EX_ILLEGAL_VALUE);
+    if(number_registers >= 126) return ModBus_Exception_Response(pRxTxBuff, MB_EX_ILLEGAL_VALUE);
 
     // Адрес
-    uint16_t starting_register_number = MODBUS_SLAVE_FUNCTION_STARTING_REGISTER_NUMBER(pRxBuff);
-    *(pTxBuff + 2 )	= number_registers * 2;
+    uint16_t starting_register_number = MODBUS_SLAVE_FUNCTION_STARTING_REGISTER_NUMBER(pRxTxBuff);
+    *(pRxTxBuff + 2 )	= number_registers * 2;
 
     for(uint8_t counter = 0; counter < number_registers; counter++) {
-        MODBUS_SLAVE_FUNCTION_REGISTER_SET(pTxBuff, starting_register_number + counter, ReadModBusReg(pRegmap, number_registers + counter));
+        MODBUS_SLAVE_FUNCTION_REGISTER_SET(pRxTxBuff, starting_register_number + counter, ReadModBusReg(pRegmap, number_registers + counter));
     }
     return (number_registers * 2) + 3;
 }
@@ -39,7 +39,7 @@ uint8_t ModBus_0x03_Read_Registers(struct modbus_slave_unique_registers_map *pRe
 //------------------------------------------------------
 // Чтение значений из нескольких регистров ввода
 //------------------------------------------------------
-uint8_t ModBus_0x04_Read_Input_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint16_t *pRxBuff, uint16_t *pTxBuff)
+uint8_t ModBus_0x04_Read_Input_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint16_t *pRxTxBuff)
 {
     ///	Чтение регистров
     //	Запрос:
@@ -52,17 +52,17 @@ uint8_t ModBus_0x04_Read_Input_Registers(struct modbus_slave_unique_registers_ma
     //	+-------+---------+--------------------------------+--------------------------+--------------------------+-------+-------+
 
     // Количество регистров в блоке
-    uint16_t number_registers = MODBUS_SLAVE_FUNCTION_NUMBER_REGISTERS(pRxBuff);
+    uint16_t number_registers = MODBUS_SLAVE_FUNCTION_NUMBER_REGISTERS(pRxTxBuff);
     // Для начала проверим не выходит ли значение за диапазон
     // 0x03 — Величина, содержащаяся в поле данных запроса, является недопустимой величиной
-    if(number_registers >= 126) return ModBus_Exception_Response(pRxBuff, pTxBuff, MB_EX_ILLEGAL_VALUE);
+    if(number_registers >= 126) return ModBus_Exception_Response(pRxTxBuff, MB_EX_ILLEGAL_VALUE);
     // Адрес
-    uint16_t starting_register_number = MODBUS_SLAVE_FUNCTION_STARTING_REGISTER_NUMBER(pRxBuff);
+    uint16_t starting_register_number = MODBUS_SLAVE_FUNCTION_STARTING_REGISTER_NUMBER(pRxTxBuff);
 
-    *(pTxBuff + 2 )	= number_registers * 2;
+    *(pRxTxBuff + 2 )	= number_registers * 2;
 
     for(uint8_t counter = 0; counter < number_registers; counter++) {
-        MODBUS_SLAVE_FUNCTION_REGISTER_SET(pTxBuff, starting_register_number + counter, ReadModBusReg(pRegmap, starting_register_number + counter));
+        MODBUS_SLAVE_FUNCTION_REGISTER_SET(pRxTxBuff, starting_register_number + counter, ReadModBusReg(pRegmap, starting_register_number + counter));
     }
     return (number_registers * 2) + 3;
 }
@@ -70,7 +70,7 @@ uint8_t ModBus_0x04_Read_Input_Registers(struct modbus_slave_unique_registers_ma
 //------------------------------------------------------
 // Запись значения в один регистр хранения
 //------------------------------------------------------
-uint8_t ModBus_0x06_Write_Single_Register(struct modbus_slave_unique_registers_map *pRegmap, uint16_t *pRxBuff, uint16_t *pTxBuff)
+uint8_t ModBus_0x06_Write_Single_Register(struct modbus_slave_unique_registers_map *pRegmap, uint16_t *pRxTxBuff)
 {
     uint8_t offset = 0;
 
@@ -80,7 +80,7 @@ uint8_t ModBus_0x06_Write_Single_Register(struct modbus_slave_unique_registers_m
 //------------------------------------------------------
 // Запись значений в несколько регистров хранения
 //------------------------------------------------------
-uint8_t ModBus_0x10_Write_Multiple_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint16_t *pRxBuff, uint16_t *pTxBuff)
+uint8_t ModBus_0x10_Write_Multiple_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint16_t *pRxTxBuff)
 {
     ///	Запись регистров
     //	Запрос:
@@ -93,15 +93,15 @@ uint8_t ModBus_0x10_Write_Multiple_Registers(struct modbus_slave_unique_register
     //	+-------+---------+---------------------------------------+---------------------------------------+---------------------------------------------+---------------------------------------------+-------+-------+
 
     // Количество регистров в блоке
-    uint16_t number_registers = MODBUS_SLAVE_FUNCTION_NUMBER_REGISTERS(pRxBuff);
+    uint16_t number_registers = MODBUS_SLAVE_FUNCTION_NUMBER_REGISTERS(pRxTxBuff);
     // Для начала проверим не выходит ли значение за диапазон
     // 0x03 — Величина, содержащаяся в поле данных запроса, является недопустимой величиной
-    if(number_registers >= 126) return ModBus_Exception_Response(pRxBuff, pTxBuff, MB_EX_ILLEGAL_VALUE);
+    if(number_registers >= 126) return ModBus_Exception_Response(pRxTxBuff, MB_EX_ILLEGAL_VALUE);
     // Адрес
-    uint16_t starting_register_number = MODBUS_SLAVE_FUNCTION_STARTING_REGISTER_NUMBER(pRxBuff);
+    uint16_t starting_register_number = MODBUS_SLAVE_FUNCTION_STARTING_REGISTER_NUMBER(pRxTxBuff);
 
     for(uint8_t counter = 0; counter < number_registers; counter++) {
-        WrightModBusReg(pRegmap, MODBUS_SLAVE_FUNCTION_REGISTER_GET(pRxBuff, counter), starting_register_number + counter);
+        WrightModBusReg(pRegmap, MODBUS_SLAVE_FUNCTION_REGISTER_GET(pRxTxBuff, counter), starting_register_number + counter);
     }
 
     return 6;
@@ -109,7 +109,7 @@ uint8_t ModBus_0x10_Write_Multiple_Registers(struct modbus_slave_unique_register
 
 // Ответить исключением
 //------------------------------------------------------
-uint8_t ModBus_Exception_Response(uint16_t *pRxBuff, uint16_t *pTxBuff, uint8_t Exception)
+uint8_t ModBus_Exception_Response(uint16_t *pRxTxBuff, uint8_t Exception)
 {
     uint8_t offset = 0;
 
