@@ -21,18 +21,18 @@ void ModBusRTU_Slave_Service(struct modbus_rtu_slave *pModBusRTU_Slave)
         case MB_FC_READ_INPUT_STAT: break;
         case MB_FC_READ_REGS:
         case MB_FC_READ_INPUT_REGS: {
-
+            ModBus_0x03_Read_Registers(pModBusRTU_Slave->Registers_map.pRegisters_map, pModBusRTU_Slave->RxBufferTxBuffer.byte);
             break;
         }
         case MB_FC_WRITE_COIL: break;
         case MB_FC_WRITE_REG: {
-
+            ModBus_0x06_Write_Single_Register(pModBusRTU_Slave->Registers_map.pRegisters_map, pModBusRTU_Slave->RxBufferTxBuffer.byte);
             break;
         }
         case MB_FC_READ_EXCEP_STAT: break;
         case MB_FC_WRITE_COILS: break;
         case MB_FC_WRITE_REGS: {
-
+            ModBus_0x10_Write_Multiple_Registers(pModBusRTU_Slave->Registers_map.pRegisters_map, pModBusRTU_Slave->RxBufferTxBuffer.byte);
             break;
         }
         case MB_FC_MASK_WRITE_REG: break;
