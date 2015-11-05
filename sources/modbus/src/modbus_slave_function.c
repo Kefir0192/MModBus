@@ -8,8 +8,10 @@
 //------------------------------------------------------
 // Чтение значений из нескольких регистров хранения
 //------------------------------------------------------
-uint8_t ModBus_0x03_Read_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint16_t *pRxTxBuff)
+uint8_t ModBus_0x03_Read_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint8_t *pRxTxBuff)
 {
+    // pRegmap and pRxTxBuff != NULL ?
+    if((pRegmap == NULL) || (pRxTxBuff == NULL)) return 0;
     ///	Чтение регистров
     //	Запрос:
     //	+---0---+----1----+-------------------2-------------------+-------------------3-------------------+-----------------------4---------------------+----------------------5----------------------+---6---+---7---+
@@ -41,8 +43,10 @@ uint8_t ModBus_0x03_Read_Registers(struct modbus_slave_unique_registers_map *pRe
 //------------------------------------------------------
 // Чтение значений из нескольких регистров ввода
 //------------------------------------------------------
-uint8_t ModBus_0x04_Read_Input_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint16_t *pRxTxBuff)
+uint8_t ModBus_0x04_Read_Input_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint8_t *pRxTxBuff)
 {
+    // pRegmap and pRxTxBuff != NULL ?
+    if((pRegmap == NULL) || (pRxTxBuff == NULL)) return 0;
     ///	Чтение регистров
     //	Запрос:
     //	+---0---+----1----+-------------------2-------------------+-------------------3-------------------+-----------------------4---------------------+----------------------5----------------------+---6---+---7---+
@@ -74,8 +78,10 @@ uint8_t ModBus_0x04_Read_Input_Registers(struct modbus_slave_unique_registers_ma
 //------------------------------------------------------
 // Запись значения в один регистр хранения
 //------------------------------------------------------
-uint8_t ModBus_0x06_Write_Single_Register(struct modbus_slave_unique_registers_map *pRegmap, uint16_t *pRxTxBuff)
+uint8_t ModBus_0x06_Write_Single_Register(struct modbus_slave_unique_registers_map *pRegmap, uint8_t *pRxTxBuff)
 {
+    // pRegmap and pRxTxBuff != NULL ?
+    if((pRegmap == NULL) || (pRxTxBuff == NULL)) return 0;
     uint8_t offset = 0;
 
     // return offset
@@ -85,8 +91,10 @@ uint8_t ModBus_0x06_Write_Single_Register(struct modbus_slave_unique_registers_m
 //------------------------------------------------------
 // Запись значений в несколько регистров хранения
 //------------------------------------------------------
-uint8_t ModBus_0x10_Write_Multiple_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint16_t *pRxTxBuff)
+uint8_t ModBus_0x10_Write_Multiple_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint8_t *pRxTxBuff)
 {
+    // pRegmap and pRxTxBuff != NULL ?
+    if((pRegmap == NULL) || (pRxTxBuff == NULL)) return 0;
     ///	Запись регистров
     //	Запрос:
     //	+---0---+----1----+-------------------2-------------------+-------------------3-------------------+-----------------------4---------------------+----------------------5----------------------+----------------6---------------+-------------7------------+--------------8-----------+---9---+---10--+
@@ -115,8 +123,10 @@ uint8_t ModBus_0x10_Write_Multiple_Registers(struct modbus_slave_unique_register
 
 // Ответить исключением
 //------------------------------------------------------
-uint8_t ModBus_Exception_Response(uint16_t *pRxTxBuff, uint8_t Exception)
+uint8_t ModBus_Exception_Response(uint8_t *pRxTxBuff, uint8_t Exception)
 {
+    // pRxTxBuff and pRxTxBuff != NULL ?
+    if((pRxTxBuff == NULL)) return 0;
     *(pRxTxBuff + 1 ) = Exception; *(pRxTxBuff + 2 ) = Exception;
 
     // return offset
