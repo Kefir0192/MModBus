@@ -235,7 +235,8 @@ void ModBusRTU_Slave_TimerTic(struct modbus_rtu_slave *pModBusRTU_Slave)
                 // CRC
                 uint16_t crc = crc16_block(0xffff, pModBusRTU_Slave->pRxTxBuff, pModBusRTU_Slave->RxByteOffset - 2);
                 if(RETURN_HIGH_AND_LOW(pModBusRTU_Slave->pRxTxBuff[pModBusRTU_Slave->RxByteOffset - 1],
-                                       pModBusRTU_Slave->pRxTxBuff[pModBusRTU_Slave->RxByteOffset - 2]) == crc) {
+                                       pModBusRTU_Slave->pRxTxBuff[pModBusRTU_Slave->RxByteOffset - 2]) == crc)
+                {
                     // Устанавливаем флаг принятого фрейма.
                     pModBusRTU_Slave->ReadyRxData = 1;
                     // Принимаем первый байт
