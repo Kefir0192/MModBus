@@ -304,8 +304,14 @@ void ModBusRTU_Slave_Service(struct modbus_rtu_slave *pModBusRTU_Slave)
     uint8_t offset = 0;
 
     switch(*(pModBusRTU_Slave->pRxTxBuff + 1)) {
-        case MB_FC_READ_COILS: break;
-        case MB_FC_READ_INPUT_STAT: break;
+        case MB_FC_READ_COILS: {
+            offset = ModBus_Exception_Response(pModBusRTU_Slave->pRxTxBuff, MB_EX_ILLEGAL_FUNCTION);
+            break;
+        }
+        case MB_FC_READ_INPUT_STAT: {
+            offset = ModBus_Exception_Response(pModBusRTU_Slave->pRxTxBuff, MB_EX_ILLEGAL_FUNCTION);
+            break;
+        }
         case MB_FC_READ_REGS:
         case MB_FC_READ_INPUT_REGS: {
             offset = ModBus_0x03_Read_Registers(pModBusRTU_Slave->Registers_map.pRegisters_map, pModBusRTU_Slave->pRxTxBuff);
@@ -316,20 +322,50 @@ void ModBusRTU_Slave_Service(struct modbus_rtu_slave *pModBusRTU_Slave)
             offset = ModBus_0x06_Write_Single_Register(pModBusRTU_Slave->Registers_map.pRegisters_map, pModBusRTU_Slave->pRxTxBuff);
             break;
         }
-        case MB_FC_READ_EXCEP_STAT: break;
-        case MB_FC_WRITE_COILS: break;
+        case MB_FC_READ_EXCEP_STAT: {
+            offset = ModBus_Exception_Response(pModBusRTU_Slave->pRxTxBuff, MB_EX_ILLEGAL_FUNCTION);
+            break;
+        }
+        case MB_FC_WRITE_COILS: {
+            offset = ModBus_Exception_Response(pModBusRTU_Slave->pRxTxBuff, MB_EX_ILLEGAL_FUNCTION);
+            break;
+        }
         case MB_FC_WRITE_REGS: {
             offset = ModBus_0x10_Write_Multiple_Registers(pModBusRTU_Slave->Registers_map.pRegisters_map, pModBusRTU_Slave->pRxTxBuff);
             break;
         }
-        case MB_FC_MASK_WRITE_REG: break;
-        case MB_FC_READ_FIFO_QUEUE: break;
-        case MB_FC_READ_FILE_RECORD: break;
-        case MB_FC_WRITE_FILE_RECORD: break;
-        case MB_FC_DIAGNOSTIC: break;
-        case MB_FC_GET_COM_EVENT_COUN: break;
-        case MB_FC_GET_COM_EVENT_LOG: break;
-        case MB_FC_REPORT_SLAVE_ID: break;
+        case MB_FC_MASK_WRITE_REG: {
+            offset = ModBus_Exception_Response(pModBusRTU_Slave->pRxTxBuff, MB_EX_ILLEGAL_FUNCTION);
+            break;
+        }
+        case MB_FC_READ_FIFO_QUEUE: {
+            offset = ModBus_Exception_Response(pModBusRTU_Slave->pRxTxBuff, MB_EX_ILLEGAL_FUNCTION);
+            break;
+        }
+        case MB_FC_READ_FILE_RECORD: {
+            offset = ModBus_Exception_Response(pModBusRTU_Slave->pRxTxBuff, MB_EX_ILLEGAL_FUNCTION);
+            break;
+        }
+        case MB_FC_WRITE_FILE_RECORD: {
+            offset = ModBus_Exception_Response(pModBusRTU_Slave->pRxTxBuff, MB_EX_ILLEGAL_FUNCTION);
+            break;
+        }
+        case MB_FC_DIAGNOSTIC: {
+            offset = ModBus_Exception_Response(pModBusRTU_Slave->pRxTxBuff, MB_EX_ILLEGAL_FUNCTION);
+            break;
+        }
+        case MB_FC_GET_COM_EVENT_COUN: {
+            offset = ModBus_Exception_Response(pModBusRTU_Slave->pRxTxBuff, MB_EX_ILLEGAL_FUNCTION);
+            break;
+        }
+        case MB_FC_GET_COM_EVENT_LOG: {
+            offset = ModBus_Exception_Response(pModBusRTU_Slave->pRxTxBuff, MB_EX_ILLEGAL_FUNCTION);
+            break;
+        }
+        case MB_FC_REPORT_SLAVE_ID: {
+            offset = ModBus_Exception_Response(pModBusRTU_Slave->pRxTxBuff, MB_EX_ILLEGAL_FUNCTION);
+            break;
+        }
 
         default: {
             offset = ModBus_Exception_Response(pModBusRTU_Slave->pRxTxBuff, MB_EX_ILLEGAL_FUNCTION);
