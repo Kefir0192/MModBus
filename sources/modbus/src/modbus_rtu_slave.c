@@ -278,7 +278,7 @@ void ModBusRTU_Slave_Byte_Write(struct modbus_rtu_slave *pModBusRTU_Slave, uint8
     pModBusRTU_Slave->Counter = 0;
     pModBusRTU_Slave->ByteNumber = ByteNumber;
     // Подсчитать контрольную сумму
-    uint16_t crc = crc16_block(0xffff, pModBusRTU_Slave->pRxTxBuff, ByteNumber - 2);
+    uint16_t crc = crc16_block(0xffff, pModBusRTU_Slave->pRxTxBuff, ByteNumber);
 
     *(pModBusRTU_Slave->pRxTxBuff + ByteNumber - 2) = RETURN_HIGH(crc);
     *(pModBusRTU_Slave->pRxTxBuff + ByteNumber - 1) = RETURN_LOW(crc);
