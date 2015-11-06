@@ -8,31 +8,215 @@
 
 
 //-----------------------------------------------------
+// Прерывание от периферийного модуля по окончанию передачи байта
+//-----------------------------------------------------
+void ModBusRTU_Slave_InterBytes_Sent(struct modbus_rtu_slave *pModBusRTU_Slave)
+{
+    if(pModBusRTU_Slave->Counter != pModBusRTU_Slave->ByteNumber)
+    {
+        // Передача байта
+        pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_UART_Write_Phisic(pModBusRTU_Slave->pRxTxBuff[pModBusRTU_Slave->Counter++]);
+    }
+    else
+    {
+        // Запретить прерывание по окончанию передачи
+        pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Disable_Inter_Trans_Phisic();
+        pModBusRTU_Slave->Counter = 0;
+        pModBusRTU_Slave->TxTimerBytes.Enable = 1;
+        pModBusRTU_Slave->TxTimerBytes.Value = 0;
+        // Запустить таймер
+        pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Start();
+    }
+}
+
+//-----------------------------------------------------
+// Прерывание от периферийного модуля по приему байта
+//-----------------------------------------------------
+void ModBusRTU_Slave_Byte_Read(struct modbus_rtu_slave *pModBusRTU_Slave, uint8_t Data)
+{
+    if(pModBusRTU_Slave->RxPacket == 1)
+    {
+        // Выключаем таймер
+        pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Stop();
+        // Стоп, 1.5 символа
+        pModBusRTU_Slave->RxTimerBytes.Enable = 0;
+        // Проверяем значение счетчика с заранее инициализированным значение MODBUSRTUSLAVE_PERIOD_15_MAX
+        // Если все Good (=) то записываем данные в буфер, разрешаем 1.5
+        // Иначе херим пакет
+        if(pModBusRTU_Slave->RxTimerBytes.Value <= MODBUSRTUSLAVE_PERIOD_15_MAX)
+        {
+            // Слухай! -А ? У нас буфер не переполнен ? - *** знает! - ...окай.
+            if(pModBusRTU_Slave->RxByteOffset <= SIZE_UART_BUFFER)
+            {
+                // Записываем байт в буфер
+                pModBusRTU_Slave->pRxTxBuff[pModBusRTU_Slave->RxByteOffset++] = Data;
+                // Старт таймер, 1.5 символа
+                pModBusRTU_Slave->RxTimerBytes.Enable = 1;
+                pModBusRTU_Slave->RxTimerBytes.Value = 0;
+                // Старт таймер, 3.5 символа
+                pModBusRTU_Slave->RxTimerFrame.Enable = 1;
+                pModBusRTU_Slave->RxTimerFrame.Value = 0;
+                // Включить таймер
+                pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Start();
+            }
+            else
+            {
+                // Херим пакет.
+                pModBusRTU_Slave->RxPacket = 0;
+                // Стоп таймер, 1.5 символа
+                pModBusRTU_Slave->RxTimerBytes.Enable = 0;
+                pModBusRTU_Slave->RxTimerBytes.Value = 0;
+                // Стоп таймер, 3.5 символа
+                pModBusRTU_Slave->RxTimerFrame.Enable = 0;
+                pModBusRTU_Slave->RxTimerFrame.Value = 0;
+                // Устанавливаем флаг убитого фрейма.
+                pModBusRTU_Slave->ReadyRxData = 0;
+            }
+        }
+        else
+        {
+            // Херим пакет.
+            pModBusRTU_Slave->RxPacket = 0;
+            // Стоп таймер, 1.5 символа
+            pModBusRTU_Slave->RxTimerBytes.Enable = 0;
+            pModBusRTU_Slave->RxTimerBytes.Value = 0;
+            // Стоп таймер, 3.5 символа
+            pModBusRTU_Slave->RxTimerFrame.Enable = 0;
+            pModBusRTU_Slave->RxTimerFrame.Value = 0;
+            // Устанавливаем флаг убитого фрейма.
+            pModBusRTU_Slave->ReadyRxData = 0;
+        }
+    }
+    // Принят первый байт Modbus пакета
+    else
+    {
+        // Принят перый байт
+        pModBusRTU_Slave->RxPacket     = 1;
+        // Указатель на начало буфера
+        pModBusRTU_Slave->RxByteOffset = 0;
+        // Записываем байт в буфер
+        pModBusRTU_Slave->pRxTxBuff[pModBusRTU_Slave->RxByteOffset++] = Data;
+        // Старт таймер, 1.5 символа
+        pModBusRTU_Slave->RxTimerBytes.Enable = 1;
+        pModBusRTU_Slave->RxTimerBytes.Value = 0;
+        // Старт таймер, 3.5 символа
+        pModBusRTU_Slave->RxTimerFrame.Enable = 1;
+        pModBusRTU_Slave->RxTimerFrame.Value = 0;
+        // Устанавливаем флаг убитого фрейма.
+        pModBusRTU_Slave->ReadyRxData = 0;
+        // Включить таймер
+        pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Start();
+    }
+}
+
+//-----------------------------------------------------
+// Прерывание таймера. Щелкает с частотой передачи одного байта
+//-----------------------------------------------------
+void ModBusRTU_Slave_TimerTic(struct modbus_rtu_slave *pModBusRTU_Slave)
+{
+    if(pModBusRTU_Slave->RxTimerBytes.Enable == 1)
+    {
+        pModBusRTU_Slave->RxTimerBytes.Value++;
+        if(pModBusRTU_Slave->RxTimerBytes.Value > MODBUSRTUSLAVE_PERIOD_15_MAX)
+        {
+            // Стоп таймер, 1.5 символа
+            pModBusRTU_Slave->RxTimerBytes.Enable = 0;
+        }
+    }
+    if(pModBusRTU_Slave->RxTimerFrame.Enable == 1)
+    {
+        pModBusRTU_Slave->RxTimerFrame.Value++;
+        if(pModBusRTU_Slave->RxTimerFrame.Value >= MODBUSRTUSLAVE_PERIOD_35_MIN)
+        {
+            // Выключаем таймер
+            pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Stop();
+            // Стоп таймер, 3.5 символа
+            pModBusRTU_Slave->RxTimerFrame.Enable = 0;
+            pModBusRTU_Slave->RxTimerFrame.Value = 0;
+            // Проверить адрес
+            if(pModBusRTU_Slave->pRxTxBuff[0] == pModBusRTU_Slave->DeviceAddrSpeed.Addr)
+            {
+                // Подсчитать контрольную сумму
+                // CRC
+                uint16_t crc = crc16_block(0xffff, pModBusRTU_Slave->pRxTxBuff, pModBusRTU_Slave->RxByteOffset - 2);
+                if(RETURN_HIGH_AND_LOW(pModBusRTU_Slave->pRxTxBuff[pModBusRTU_Slave->RxByteOffset - 1], pModBusRTU_Slave->pRxTxBuff[pModBusRTU_Slave->RxByteOffset - 2]) == crc)
+                {
+                    // Устанавливаем флаг принятого фрейма.
+                    pModBusRTU_Slave->ReadyRxData = 1;
+                    // Принимаем первый байт
+                    pModBusRTU_Slave->RxPacket = 0;
+                }
+                else
+                {
+                    // Херим пакет.
+                    pModBusRTU_Slave->RxPacket = 0;
+                }
+            }
+            else
+            {
+                // Херим пакет.
+                pModBusRTU_Slave->RxPacket = 0;
+            }
+        }
+    }
+    // Сделано для того чтобы по прерыванию таймера линию данных установить на прием
+    if(pModBusRTU_Slave->TxTimerBytes.Enable == 1)
+    {
+        if(pModBusRTU_Slave->TxTimerBytes.Value == MODBUSRTUSLAVE_ADD_BYTE_END)
+        {
+            pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Stop();
+            pModBusRTU_Slave->TxTimerBytes.Enable = 0;
+            pModBusRTU_Slave->TxTimerBytes.Value = 0;
+            // Разрешить прерывание по приему байта
+            pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Enable_Inter_Receiv_Phisic();
+            pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_RTS1_RX();
+        }
+        pModBusRTU_Slave->TxTimerBytes.Value++;
+    }
+}
+
+//-----------------------------------------------------
+// Передача массива байт
+//-----------------------------------------------------
+void ModBusRTU_Slave_Byte_Write(struct modbus_rtu_slave *pModBusRTU_Slave, uint8_t ByteNumber)
+{
+    pModBusRTU_Slave->Counter = 0;
+    pModBusRTU_Slave->ByteNumber = ByteNumber;
+    // Подсчитать контрольную сумму
+    uint16_t crc = crc16_block(0xffff, pModBusRTU_Slave->pRxTxBuff, ByteNumber - 2);
+
+    *(pModBusRTU_Slave->pRxTxBuff + ByteNumber - 2) = RETURN_HIGH(crc);
+    *(pModBusRTU_Slave->pRxTxBuff + ByteNumber - 1) = RETURN_LOW(crc);
+    // Разрешить прерывание по окончанию передачи байта
+    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Enable_Inter_Trans_Phisic();
+}
+
+//-----------------------------------------------------
 // Служба MODBUS RTU
 //-----------------------------------------------------
 void ModBusRTU_Slave_Service(struct modbus_rtu_slave *pModBusRTU_Slave)
 {
     // pModBusRTU_Slave != NULL ?
     if(pModBusRTU_Slave == NULL) return;
+    uint8_t offset = 0;
 
-
-    switch(*(pModBusRTU_Slave->RxBufferTxBuffer.byte + 1)) {
+    switch(*(pModBusRTU_Slave->pRxTxBuff + 1)) {
         case MB_FC_READ_COILS: break;
         case MB_FC_READ_INPUT_STAT: break;
         case MB_FC_READ_REGS:
         case MB_FC_READ_INPUT_REGS: {
-            ModBus_0x03_Read_Registers(pModBusRTU_Slave->Registers_map.pRegisters_map, pModBusRTU_Slave->RxBufferTxBuffer.byte);
+            offset = ModBus_0x03_Read_Registers(pModBusRTU_Slave->Registers_map.pRegisters_map, pModBusRTU_Slave->pRxTxBuff);
             break;
         }
         case MB_FC_WRITE_COIL: break;
         case MB_FC_WRITE_REG: {
-            ModBus_0x06_Write_Single_Register(pModBusRTU_Slave->Registers_map.pRegisters_map, pModBusRTU_Slave->RxBufferTxBuffer.byte);
+            offset = ModBus_0x06_Write_Single_Register(pModBusRTU_Slave->Registers_map.pRegisters_map, pModBusRTU_Slave->pRxTxBuff);
             break;
         }
         case MB_FC_READ_EXCEP_STAT: break;
         case MB_FC_WRITE_COILS: break;
         case MB_FC_WRITE_REGS: {
-            ModBus_0x10_Write_Multiple_Registers(pModBusRTU_Slave->Registers_map.pRegisters_map, pModBusRTU_Slave->RxBufferTxBuffer.byte);
+            offset = ModBus_0x10_Write_Multiple_Registers(pModBusRTU_Slave->Registers_map.pRegisters_map, pModBusRTU_Slave->pRxTxBuff);
             break;
         }
         case MB_FC_MASK_WRITE_REG: break;
@@ -45,7 +229,9 @@ void ModBusRTU_Slave_Service(struct modbus_rtu_slave *pModBusRTU_Slave)
         case MB_FC_REPORT_SLAVE_ID: break;
 
         default: {
-            ModBus_Exception_Response(pModBusRTU_Slave->RxBufferTxBuffer.byte, MB_EX_ILLEGAL_FUNCTION);
+            offset = ModBus_Exception_Response(pModBusRTU_Slave->pRxTxBuff, MB_EX_ILLEGAL_FUNCTION);
         }
     }
+    // Write data
+    ModBusRTU_Slave_Byte_Write(pModBusRTU_Slave, offset);
 }

@@ -15,6 +15,39 @@ typedef struct {
     uint8_t byte[SIZE_UART_BUFFER];
 }MODBUSBUFFER;
 
+
+/*
+ * Нужно реализовать в phisic.
+ * Код функций расположен в файле phisic.c
+ * Все эти функции содержат регистры контроллера
+ * */
+struct modbus_rtu_slave_function {
+    // Инициализация UART
+    void (*pModBusRTU_Slave_UART_Init)(uint8_t Speed);
+    // Разрешить прерывание по окончанию передачи
+    void (*pModBusRTU_Slave_Enable_Inter_Trans_Phisic)(void);
+    // Запретить прерывание по окончанию передачи
+    void (*pModBusRTU_Slave_Disable_Inter_Trans_Phisic)(void);
+    // Разрешить прерывание по приему байта
+    void (*pModBusRTU_Slave_Enable_Inter_Receiv_Phisic)(void);
+    // Запретить прерывание по приему байта
+    void (*pModBusRTU_Slave_Disable_Inter_Receiv_Phisic)(void);
+    // Передача байта
+    void (*pModBusRTU_Slave_UART_Write_Phisic)(uint8_t Data);
+
+    // Инициализация Таймера
+    void (*pModBusRTU_Slave_Timer_Init)(uint8_t Speed);
+    // Запустить таймер
+    void (*pModBusRTU_Slave_Timer_Start)(void);
+    // Стоп таймер
+    void (*pModBusRTU_Slave_Timer_Stop)(void);
+
+    // Направление линии на прием
+    void (*pModBusRTU_Slave_RTS1_RX)(void);
+    // Направление линии на передачу
+    void (*pModBusRTU_Slave_RTS1_TX)(void);
+};
+
 //-----------------------------------------------------
 // Структура данных ModBusRTU_Slave стека
 //-----------------------------------------------------
@@ -23,10 +56,8 @@ struct modbus_rtu_slave {
     // Структура адрес и скорость устройства
     //----------------------------------------------------
     struct {
-        // Адрес устройства
-        uint8_t Addr,
-        // Скорость устройства
-                Speed;
+        uint8_t Addr,   // Адрес устройства
+                Speed;  // Скорость устройства
     }DeviceAddrSpeed;
     //----------------------------------------------------
     // Если обнаружен разрыв между символами длительностью
@@ -34,10 +65,8 @@ struct modbus_rtu_slave {
     // приемник должен поставить «черную метку»
     //----------------------------------------------------
     struct {
-        // Разрешаем отсчет времени
-        uint8_t	Enable,
-        // Текущие значение счетчика
-                Value;
+        uint8_t	Enable, // Разрешаем отсчет времени
+                Value;  // Текущие значение счетчика
     }RxTimerBytes;
     //----------------------------------------------------
     // В Modbus RTU разделителем сообщений (фреймов,
@@ -46,18 +75,21 @@ struct modbus_rtu_slave {
     // что стандартный символ передается УАРТом 11-ю битами
     //----------------------------------------------------
     struct {
-        // Разрешаем отсчет времени
-        uint8_t	Enable,
-        // Текущие значение счетчика
-                Value;
+        uint8_t	Enable, // Разрешаем отсчет времени
+                Value;  // Текущие значение счетчика
     }RxTimerFrame;
     //----------------------------------------------------
-    //
+    // Сделано для того чтобы по прерыванию таймера
+    // линию данных установить на прием c задержкой
     //----------------------------------------------------
-    struct {                                            //
-        uint8_t	Enable;                                 //
-        uint8_t	Value;                                  //
-    }TxTimerBytes;                                      //
+    struct {
+        uint8_t	Enable; // Разрешаем отсчет времени
+        uint8_t	Value;  // Текущие значение счетчика
+    }TxTimerBytes;
+    //----------------------------------------------------
+    // Уникальные функции периферийного контроллера
+    //----------------------------------------------------
+    struct modbus_rtu_slave_function FunctionPeriphery;
     //----------------------------------------------------
     // Уникальная карта регистров
     //----------------------------------------------------
@@ -74,8 +106,8 @@ struct modbus_rtu_slave {
             ReadyRxData,                                //  Флаг принятого фрейма
             Counter,
             ByteNumber;
-
-    MODBUSBUFFER    RxBufferTxBuffer;
+    // Указатель на приемопередающий буфер
+    uint8_t *pRxTxBuff;
 };
 
 #endif // MODBUS_RTU_SLAVE

@@ -1,6 +1,10 @@
 #ifndef MODBUS_CODE_FUNCTION
 #define MODBUS_CODE_FUNCTION
 
+#define RETURN_HIGH(a)              (((a)>>8)&0xff)
+#define RETURN_LOW(a)               ((a)&0xff)
+#define RETURN_HIGH_AND_LOW(a, b)   (((a) << 8) | (b))
+
 // Function Codes
 enum MB_FC {
     MB_FC_READ_COILS        = 0x01, // Read Coils (Output) Status 0xxxx
