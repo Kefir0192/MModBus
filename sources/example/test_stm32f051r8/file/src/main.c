@@ -4,6 +4,7 @@
 #include "modbus_rtu_slave.h"
 #include "modbus_slave_registers.h"
 #include "modbus_slave_function.h"
+#include "modbus_rtu_portable.h"
 
 
 
@@ -28,7 +29,6 @@ int main(void)
     Hardware_Init();
 
     while(1) {
-
 
     }
 }

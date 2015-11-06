@@ -96,6 +96,8 @@ void ModBusRTU_Slave_Init_Addr_Speed(struct modbus_rtu_slave *pModBusRTU_Slave, 
     pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Init(Speed);
     pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_UART_Init(Speed);
 
+    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Enable_Inter_Receiv_Phisic();
+
     // Выключаем таймер
     pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Stop();
 }
@@ -291,6 +293,14 @@ void ModBusRTU_Slave_Service(struct modbus_rtu_slave *pModBusRTU_Slave)
 {
     // pModBusRTU_Slave != NULL ?
     if(pModBusRTU_Slave == NULL) return;
+
+    // Выйти если нет новых данных
+    if(pModBusRTU_Slave->ReadyRxData != 1) return;
+    // Запретить прерывание по приему байта
+    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Disable_Inter_Receiv_Phisic();
+    // Сбросить флаг - пакет принят
+    pModBusRTU_Slave->ReadyRxData = 0;
+
     uint8_t offset = 0;
 
     switch(*(pModBusRTU_Slave->pRxTxBuff + 1)) {

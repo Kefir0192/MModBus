@@ -40,6 +40,7 @@ MModBus_inc= \
 	$(MModBus_p_modbus_inc)modbus_code_function.h \
 	$(MModBus_p_modbus_inc)modbus_slave_registers.h \
 	$(MModBus_p_modbus_inc)modbus_slave_function.h \
+	$(MModBus_p_modbus_inc)modbus_rtu_portable.h \
 	$(MModBus_p_modbus_inc)modbus_rtu_master.h \
 	$(MModBus_p_modbus_inc)modbus_rtu_slave.h
 	
