@@ -126,7 +126,7 @@ uint8_t ModBus_0x10_Write_Multiple_Registers(struct modbus_slave_unique_register
 uint8_t ModBus_Exception_Response(uint8_t *pRxTxBuff, uint8_t Exception)
 {
     // pRxTxBuff and pRxTxBuff != NULL ?
-    if((pRxTxBuff == NULL)) return 0;
+    if(pRxTxBuff == NULL) return 0;
     *(pRxTxBuff + 1 ) = Exception; *(pRxTxBuff + 2 ) = Exception;
 
     // return offset
