@@ -33,7 +33,7 @@ uint8_t ModBus_0x03_Read_Registers(struct modbus_slave_unique_registers_map *pRe
     *(pRxTxBuff + 2 )	= number_registers * 2;
 
     for(uint8_t counter = 0; counter < number_registers; counter++) {
-        MODBUS_SLAVE_FUNCTION_REGISTER_SET(pRxTxBuff, starting_register_number + counter, ReadModBusReg(pRegmap, number_registers + counter));
+        MODBUS_SLAVE_FUNCTION_REGISTER_SET(pRxTxBuff, counter, ReadModBusReg(pRegmap, starting_register_number + counter));
     }
 
     // return offset
@@ -68,7 +68,7 @@ uint8_t ModBus_0x04_Read_Input_Registers(struct modbus_slave_unique_registers_ma
     *(pRxTxBuff + 2 )	= number_registers * 2;
 
     for(uint8_t counter = 0; counter < number_registers; counter++) {
-        MODBUS_SLAVE_FUNCTION_REGISTER_SET(pRxTxBuff, starting_register_number + counter, ReadModBusReg(pRegmap, starting_register_number + counter));
+        MODBUS_SLAVE_FUNCTION_REGISTER_SET(pRxTxBuff, counter, ReadModBusReg(pRegmap, starting_register_number + counter));
     }
 
     // return offset

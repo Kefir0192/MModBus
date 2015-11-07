@@ -110,5 +110,42 @@ struct modbus_rtu_slave {
     uint8_t *pRxTxBuff;
 };
 
+
+// Инициализация ModBusRTU_Slave. Возвращает -1 в случаи ошибки
+//-----------------------------------------------------
+int8_t ModBusRTU_Slave_Init(
+        // Указатель на экземпляр структуры modbus_rtu_slave
+        struct modbus_rtu_slave *pModBusRTU_Slave,
+        // Указатель на уникальную карту регистров для каждого  экземпляра modbus_slave
+        struct modbus_slave_unique_registers_map *pRegisters_map,
+        // Указатель на приемопередающий буфер
+        uint8_t *pRxTxBuff,
+        // Число подмассивов карт регистров
+        uint8_t	NumSubArray);
+
+// Инициализация адреса и скорости
+//-----------------------------------------------------
+void ModBusRTU_Slave_Init_Addr_Speed(struct modbus_rtu_slave *pModBusRTU_Slave, uint8_t Addr, uint8_t Speed);
+
+// Прерывание от периферийного модуля по окончанию передачи байта
+//-----------------------------------------------------
+void ModBusRTU_Slave_InterBytes_Sent(struct modbus_rtu_slave *pModBusRTU_Slave);
+
+// Прерывание от периферийного модуля по приему байта
+//-----------------------------------------------------
+void ModBusRTU_Slave_Byte_Read(struct modbus_rtu_slave *pModBusRTU_Slave, uint8_t Data);
+
+// Прерывание таймера. Щелкает с частотой передачи одного байта
+//-----------------------------------------------------
+void ModBusRTU_Slave_TimerTic(struct modbus_rtu_slave *pModBusRTU_Slave);
+
+// Передача массива байт
+//-----------------------------------------------------
+void ModBusRTU_Slave_Byte_Write(struct modbus_rtu_slave *pModBusRTU_Slave, uint8_t ByteNumber);
+
+// Служба MODBUS RTU
+//-----------------------------------------------------
+void ModBusRTU_Slave_Service(struct modbus_rtu_slave *pModBusRTU_Slave);
+
 #endif // MODBUS_RTU_SLAVE
 

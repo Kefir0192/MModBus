@@ -8,16 +8,21 @@
 //-----------------------------------------------------
 // Инициализация ModBusRTU_Slave. Возвращает -1 в случаи ошибки
 //-----------------------------------------------------
-uint8_t ModBusRTU_Slave_Init(
+int8_t ModBusRTU_Slave_Init(
         // Указатель на экземпляр структуры modbus_rtu_slave
         struct modbus_rtu_slave *pModBusRTU_Slave,
         // Указатель на уникальную карту регистров для каждого  экземпляра modbus_slave
         struct modbus_slave_unique_registers_map *pRegisters_map,
         // Указатель на приемопередающий буфер
-        uint8_t *pRxTxBuff)
+        uint8_t *pRxTxBuff,
+        // Число подмассивов карт регистров
+        uint8_t	NumSubArray)
 {
-    // pModBusRTU_Slave, pRegisters_map and pRxTxBuff != NULL ?
+    // pModBusRTU_Slave, pRegisters_map, pHeaders and pRxTxBuff != NULL ?
     if((pModBusRTU_Slave == NULL) || (pRegisters_map == NULL) || (pRxTxBuff == NULL)) return -1;
+    pModBusRTU_Slave->Registers_map.pRegisters_map = pRegisters_map;
+    pModBusRTU_Slave->pRxTxBuff = pRxTxBuff;
+
     // pModBusRTU_Slave->FunctionPeriphery.*p  != NULL ?
     if( (pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Disable_Inter_Receiv_Phisic == NULL) ||
         (pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Disable_Inter_Trans_Phisic == NULL) ||
@@ -29,20 +34,15 @@ uint8_t ModBusRTU_Slave_Init(
         (pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Start == NULL) ||
         (pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Stop == NULL) ||
         (pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_UART_Init == NULL) ||
-        (pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_UART_Write_Phisic == NULL)) return -1;
-    // pRegisters_map != NULL ?
-    if(pModBusRTU_Slave->Registers_map.pRegisters_map == NULL) return -1;
+        (pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_UART_Write_Phisic == NULL)) return -2;
 
     // pHeaders != NULL ?
-    if(pModBusRTU_Slave->Registers_map.pRegisters_map->pHeaders == NULL) return -1;
+    if(pModBusRTU_Slave->Registers_map.pRegisters_map->pHeaders == NULL) return -3;
 
-    for(uint8_t counter = 0; counter < pModBusRTU_Slave->Registers_map.pRegisters_map->NumSubArray; counter++) {
+    for(uint8_t counter = 0; counter < NumSubArray; counter++) {
         // psubarray != NULL ?
-        if(pModBusRTU_Slave->Registers_map.pRegisters_map->pHeaders[counter].psubarray == NULL) return -1;
+        if(pModBusRTU_Slave->Registers_map.pRegisters_map->pHeaders[counter].psubarray == NULL) return -4;
     }
-
-    pModBusRTU_Slave->Registers_map.pRegisters_map = pRegisters_map;
-    pModBusRTU_Slave->pRxTxBuff = pRxTxBuff;
 
     //----------------------------
     // Линия RS-485 на прием
@@ -277,12 +277,12 @@ void ModBusRTU_Slave_TimerTic(struct modbus_rtu_slave *pModBusRTU_Slave)
 void ModBusRTU_Slave_Byte_Write(struct modbus_rtu_slave *pModBusRTU_Slave, uint8_t ByteNumber)
 {
     pModBusRTU_Slave->Counter = 0;
-    pModBusRTU_Slave->ByteNumber = ByteNumber;
+    pModBusRTU_Slave->ByteNumber = ByteNumber + 2; // + 2 bute CRC
     // Подсчитать контрольную сумму
     uint16_t crc = crc16_block(0xffff, pModBusRTU_Slave->pRxTxBuff, ByteNumber);
 
-    *(pModBusRTU_Slave->pRxTxBuff + ByteNumber - 2) = RETURN_HIGH(crc);
-    *(pModBusRTU_Slave->pRxTxBuff + ByteNumber - 1) = RETURN_LOW(crc);
+    *(pModBusRTU_Slave->pRxTxBuff + ByteNumber + 1) = RETURN_HIGH(crc);
+    *(pModBusRTU_Slave->pRxTxBuff + ByteNumber) = RETURN_LOW(crc);
     // Разрешить прерывание по окончанию передачи байта
     pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Enable_Inter_Trans_Phisic();
 }

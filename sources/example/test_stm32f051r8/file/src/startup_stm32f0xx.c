@@ -43,7 +43,7 @@ const ISR_VECTOR POINTER_ITERRAPT ArrayInterrapt[] = {
     loop, // TIM3_IRQHandler
     loop, // TIM6_DAC_IRQHandler
     0,
-    loop, // TIM14_IRQHandler,
+    TIM14_IRQHandler,
     loop, // TIM15_IRQHandler
     loop, // TIM16_IRQHandler
     loop, // TIM17_IRQHandler
@@ -51,7 +51,7 @@ const ISR_VECTOR POINTER_ITERRAPT ArrayInterrapt[] = {
     loop, // I2C2_IRQHandler
     loop, // SPI1_IRQHandler
     loop, // SPI2_IRQHandler
-    loop, // USART1_IRQHandler,
+    USART1_IRQHandler,
     loop, // USART2_IRQHandler
     0,
     loop, // CEC_IRQHandler

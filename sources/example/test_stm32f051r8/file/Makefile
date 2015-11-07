@@ -48,6 +48,7 @@ MModBus_opj= \
 	crc16.o \
 	modbus_slave_registers.o \
 	modbus_slave_function.o \
+	modbus_rtu_portable.o \
 	modbus_rtu_master.o \
 	modbus_rtu_slave.o
 
@@ -61,6 +62,9 @@ modbus_slave_registers.o: $(MModBus_p_modbus_src)modbus_slave_registers.c $(MMod
 
 modbus_slave_function.o: $(MModBus_p_modbus_src)modbus_slave_function.c $(MModBus_inc)
 	$(CC) $(COMPILOP) -c $(MModBus_p_modbus_src)modbus_slave_function.c -o modbus_slave_function.o
+	
+modbus_rtu_portable.o: $(MModBus_p_modbus_src)modbus_rtu_portable.c $(MModBus_inc)
+	$(CC) $(COMPILOP) -c $(MModBus_p_modbus_src)modbus_rtu_portable.c -o modbus_rtu_portable.o
 	
 modbus_rtu_master.o: $(MModBus_p_modbus_src)modbus_rtu_master.c $(MModBus_inc)
 	$(CC) $(COMPILOP) -c $(MModBus_p_modbus_src)modbus_rtu_master.c -o modbus_rtu_master.o
@@ -92,12 +96,14 @@ AFINC= \
 	$(PATH_INC)globalincludefile.h \
 	$(PATH_INC)main.h \
 	$(PATH_INC)startup_stm32f0xx.h \
-	$(PATH_INC)phisic.h
+	$(PATH_INC)phisic.h \
+	$(PATH_INC)modbus_test.h
 
 AFOBJ= \
 	startup_stm32f0xx.o \
 	main.o \
-	phisic.o
+	phisic.o \
+	modbus_test.o
 
 
 .PHONY : all
@@ -118,7 +124,8 @@ main.o: $(PATH_SRC)main.c $(AFINC)
 #===========================================================================
 # All
 #===========================================================================
-
+modbus_test.o: $(PATH_SRC)modbus_test.c $(AFINC)
+	$(CC) $(COMPILOP) -c $(PATH_SRC)modbus_test.c -o modbus_test.o
 	
 #===========================================================================
 .PHONY : clean
