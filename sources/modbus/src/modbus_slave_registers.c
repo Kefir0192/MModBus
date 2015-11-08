@@ -13,15 +13,15 @@ void ModBus_Slave_Creat_Unique_Reg_Map(
     uint16_t *psubarray,     // Указатель на подмассив регистров (uint16_t)
     uint8_t  ACCESS,         // Доступ к регистрам
     uint16_t START_ADDR,     // Стартовый адрес
-    uint16_t FINISH_ADDR)    // Конечный адрес
+    uint16_t SIZE_ARR)       // Размер массива
 {
     // pHeaders and psubarray != NULL ?
     if((pHeaders == NULL) || (psubarray == NULL)) return;
 
     pHeaders->ACCESS = ACCESS;
     pHeaders->START_ADDR = START_ADDR;
-    pHeaders->FINISH_ADDR = FINISH_ADDR;
-    pHeaders->SIZE_ARR = MODBUS_SLAVE_REGISTERS_SIZE_ARRAY(FINISH_ADDR, START_ADDR);
+    pHeaders->FINISH_ADDR = MODBUS_SLAVE_REGISTERS_FINISH_ADDR(START_ADDR, SIZE_ARR);
+    pHeaders->SIZE_ARR = SIZE_ARR;
     pHeaders->psubarray = psubarray;
 }
 

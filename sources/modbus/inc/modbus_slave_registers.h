@@ -27,7 +27,9 @@
 
 
 
-#define MODBUS_SLAVE_REGISTERS_SIZE_ARRAY(FINISH_ADDR, START_ADDR) (((FINISH_ADDR) - (START_ADDR) + 1))
+#define MODBUS_SLAVE_REGISTERS_SIZE_ARRAY(FINISH_ADDR, START_ADDR)  (((FINISH_ADDR) - (START_ADDR) + 1))
+
+#define MODBUS_SLAVE_REGISTERS_FINISH_ADDR(START_ADDR, SIZE_ARR)    ((START_ADDR) + (SIZE_ARR) - 1)
 
 
 
@@ -64,7 +66,7 @@ void ModBus_Slave_Creat_Unique_Reg_Map(
     uint16_t *psubarray,     // Указатель на подмассив регистров (uint16_t)
     uint8_t  ACCESS,         // Доступ к регистрам
     uint16_t START_ADDR,     // Стартовый адрес
-    uint16_t FINISH_ADDR);   // Конечный адрес
+    uint16_t SIZE_ARR);      // Размер массива
 
 // Создать уникальную карту регистров
 //-----------------------------------------------------

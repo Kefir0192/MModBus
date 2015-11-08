@@ -31,18 +31,14 @@ uint8_t RxTxBuff[256];
 //------------------------------------------------------
 void ModBusRTU_Slave_Init_1(void)
 {
-
     int8_t status = 0;
 
-    ModBusRTU_Slave_RegSubarray[0].ACCESS = ACCESS_REG_RW;
-    ModBusRTU_Slave_RegSubarray[0].START_ADDR = 0;
-    ModBusRTU_Slave_RegSubarray[0].FINISH_ADDR = 15;
-    ModBusRTU_Slave_RegSubarray[0].psubarray = RegMap_Table_1;
 
-    ModBusRTU_Slave_RegSubarray[1].ACCESS = ACCESS_REG_RW;
-    ModBusRTU_Slave_RegSubarray[1].START_ADDR = 32;
-    ModBusRTU_Slave_RegSubarray[1].FINISH_ADDR = 47;
-    ModBusRTU_Slave_RegSubarray[1].psubarray = RegMap_Table_2;
+    ModBus_Slave_Creat_Unique_Reg_Map(&ModBusRTU_Slave_RegSubarray[0],
+                                      RegMap_Table_1, ACCESS_REG_RW, 0, 16);
+
+    ModBus_Slave_Creat_Unique_Reg_Map(&ModBusRTU_Slave_RegSubarray[1],
+                                      RegMap_Table_1, ACCESS_REG_RW, 32, 16);
 
     ModBusRTU_Slave_RegMap.NumSubArray = 2;
     ModBusRTU_Slave_RegMap.pHeaders = ModBusRTU_Slave_RegSubarray;
@@ -82,6 +78,9 @@ void ModBusRTU_Slave_Init_1(void)
 
     RegMap_Table_1[0] = 0x01;
     RegMap_Table_1[1] = 0x02;
+
+    RegMap_Table_2[0] = 0x03;
+    RegMap_Table_2[1] = 0x04;
 
     if(status != 0) GPIOC->ODR |= GPIO_ODR_8;
 }
