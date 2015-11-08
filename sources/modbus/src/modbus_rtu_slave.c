@@ -11,16 +11,16 @@
 int8_t ModBusRTU_Slave_Init(
         // Указатель на экземпляр структуры modbus_rtu_slave
         struct modbus_rtu_slave *pModBusRTU_Slave,
-        // Указатель на уникальную карту регистров для каждого  экземпляра modbus_slave
-        struct modbus_slave_unique_registers_map *pRegisters_map,
+        // Указатель на карту полей таблиц регистров
+        struct modbus_slave_registers_map_table *pRegistersMapTable,
         // Указатель на приемопередающий буфер
         uint8_t *pRxTxBuff,
-        // Число подмассивов карт регистров
-        uint8_t	NumSubArray)
+        // Число таблиц регистров
+        uint8_t NumRegistersTable)
 {
-    // pModBusRTU_Slave, pRegisters_map, pHeaders and pRxTxBuff != NULL ?
-    if((pModBusRTU_Slave == NULL) || (pRegisters_map == NULL) || (pRxTxBuff == NULL)) return -1;
-    pModBusRTU_Slave->Registers_map.pRegisters_map = pRegisters_map;
+    // pModBusRTU_Slave, pRegistersMapTable, pHeaders and pRxTxBuff != NULL ?
+    if((pModBusRTU_Slave == NULL) || (pRegistersMapTable == NULL) || (pRxTxBuff == NULL)) return -1;
+    pModBusRTU_Slave->Registers_map.pRegistersMapTable = pRegistersMapTable;
     pModBusRTU_Slave->pRxTxBuff = pRxTxBuff;
 
     // pModBusRTU_Slave->FunctionPeriphery.*p  != NULL ?
@@ -36,12 +36,12 @@ int8_t ModBusRTU_Slave_Init(
         (pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_UART_Init == NULL) ||
         (pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_UART_Write_Phisic == NULL)) return -2;
 
-    // pHeaders != NULL ?
-    if(pModBusRTU_Slave->Registers_map.pRegisters_map->pHeaders == NULL) return -3;
+    // pRegistersTable != NULL ?
+    if(pModBusRTU_Slave->Registers_map.pRegistersMapTable->pRegistersTable== NULL) return -3;
 
-    for(uint8_t counter = 0; counter < NumSubArray; counter++) {
+    for(uint8_t counter = 0; counter < NumRegistersTable; counter++) {
         // psubarray != NULL ?
-        if(pModBusRTU_Slave->Registers_map.pRegisters_map->pHeaders[counter].psubarray == NULL) return -4;
+        if(pModBusRTU_Slave->Registers_map.pRegistersMapTable->pRegistersTable[counter].pRegistersArray == NULL) return -4;
     }
 
     //----------------------------
@@ -315,12 +315,12 @@ void ModBusRTU_Slave_Service(struct modbus_rtu_slave *pModBusRTU_Slave)
         }
         case MB_FC_READ_REGS:
         case MB_FC_READ_INPUT_REGS: {
-            offset = ModBus_0x03_Read_Registers(pModBusRTU_Slave->Registers_map.pRegisters_map, pModBusRTU_Slave->pRxTxBuff);
+            offset = ModBus_0x03_Read_Registers(pModBusRTU_Slave->Registers_map.pRegistersMapTable, pModBusRTU_Slave->pRxTxBuff);
             break;
         }
         case MB_FC_WRITE_COIL: break;
         case MB_FC_WRITE_REG: {
-            offset = ModBus_0x06_Write_Single_Register(pModBusRTU_Slave->Registers_map.pRegisters_map, pModBusRTU_Slave->pRxTxBuff);
+            offset = ModBus_0x06_Write_Single_Register(pModBusRTU_Slave->Registers_map.pRegistersMapTable, pModBusRTU_Slave->pRxTxBuff);
             break;
         }
         case MB_FC_READ_EXCEP_STAT: {
@@ -332,7 +332,7 @@ void ModBusRTU_Slave_Service(struct modbus_rtu_slave *pModBusRTU_Slave)
             break;
         }
         case MB_FC_WRITE_REGS: {
-            offset = ModBus_0x10_Write_Multiple_Registers(pModBusRTU_Slave->Registers_map.pRegisters_map, pModBusRTU_Slave->pRxTxBuff);
+            offset = ModBus_0x10_Write_Multiple_Registers(pModBusRTU_Slave->Registers_map.pRegistersMapTable, pModBusRTU_Slave->pRxTxBuff);
             break;
         }
         case MB_FC_MASK_WRITE_REG: {

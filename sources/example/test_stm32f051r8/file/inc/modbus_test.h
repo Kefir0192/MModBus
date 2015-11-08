@@ -4,12 +4,11 @@
 // Структура данных ModBusRTU_Slave стека
 extern struct modbus_rtu_slave ModBusRTU_Slave;
 
-// Указатель на уникальную карту регистров
-extern struct modbus_slave_unique_registers_map ModBusRTU_Slave_RegMap;
+// Уникальная карта полей таблиц регистров
+extern struct modbus_slave_registers_map_table ModBusRTU_Slave_RegistersMapTable;
 
-// Это заголовок для каждого подмассива (header)
-// Размер массива равен числу заведенных ModBus-ов
-extern struct modbus_slave_registers_subarray ModBusRTU_Slave_RegSubarray[2];
+// Таблицы регистров
+extern struct modbus_slave_registers_table ModBusRTU_Slave_RegistersTable[2];
 
 // RegMap_Table_1
 extern uint16_t RegMap_Table_1[16];

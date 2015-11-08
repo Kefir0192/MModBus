@@ -42,54 +42,59 @@ enum ACCESS {
 
 
 
-// Это заголовок для каждого подмассива (header)
-// Размер массива равен числу заведенных ModBus-ов
-struct modbus_slave_registers_subarray {
+// Таблицы регистров
+// Это заголовок для каждой таблицы регистров
+struct modbus_slave_registers_table {
         uint8_t  ACCESS;            // Доступ к регистрам
         uint16_t START_ADDR;        // Стартовый адрес
-        uint16_t FINISH_ADDR;       // Конечный адрес
         uint16_t SIZE_ARR;          // Размер массива
-        uint16_t *psubarray;        // Указатель на подмассив для которого будет сделан этот заголовок
+        uint16_t *pRegistersArray;  // Указатель на массив ячеек регистров
 };
 
-// Уникальная карта регистров для каждого экземпляра modbus_slave
-struct modbus_slave_unique_registers_map {
-    struct modbus_slave_registers_subarray *pHeaders;// Указатель на массив карт регистров
-    uint8_t	NumSubArray;                             // Число подмассивов карт регистров
+// Уникальная карта полей таблиц регистров
+struct modbus_slave_registers_map_table {
+    struct modbus_slave_registers_table *pRegistersTable;// Указатель на массив таблиц регистров
+    uint8_t	NumRegistersTable;                           // Число таблиц регистров
 };
 
 
-// Создать уникальную карту регистров
+// Создать карту таблиц регистров
 //-----------------------------------------------------
-void ModBus_Slave_Creat_Unique_Reg_Map(
-    struct modbus_slave_registers_subarray *pHeaders, // Указатель на массив карт регистров
-    uint16_t *psubarray,     // Указатель на подмассив регистров (uint16_t)
-    uint8_t  ACCESS,         // Доступ к регистрам
-    uint16_t START_ADDR,     // Стартовый адрес
-    uint16_t SIZE_ARR);      // Размер массива
+void ModBus_Slave_Creat_Registers_Map_Table(
+    // Уникальная карта регистров для каждого экземпляра modbus_slave
+    struct modbus_slave_registers_map_table *pRegistersMapTable,
+    // Указатель на массив таблиц регистров
+    struct modbus_slave_registers_table *pRegistersTable,
+    // Число таблиц регистров
+    uint8_t NumRegistersTable);
 
-// Создать уникальную карту регистров
+// Инициализировать таблицу регистров
 //-----------------------------------------------------
-void ModBus_Slave_Creat_Unique_Reg_Map(
-    struct modbus_slave_registers_subarray *pHeaders, // Указатель на массив карт регистров
-    uint16_t *psubarray,     // Указатель на подмассив регистров (uint16_t)
-    uint8_t  ACCESS,         // Доступ к регистрам
-    uint16_t START_ADDR,     // Стартовый адрес
-    uint16_t FINISH_ADDR);   // Конечный адрес
+void ModBus_Slave_Initialize_Registers_Table(
+    // Таблицы регистров
+    struct modbus_slave_registers_table  *pRegistersTable,
+    // Указатель на массив ячеек регистров
+    uint16_t *pRegistersArray,
+    // Доступ к регистрам
+    uint8_t  ACCESS,
+    // Стартовый адрес
+    uint16_t START_ADDR,
+    // Размер массива
+    uint16_t SIZE_ARR);
 
 // Функция записи одного регистра ModBus с проверкой возможности записи
 // *pRegmap - экземпляр уникальной карты регистров с которым ведется работа в конкретном случае (их же может быть не один штук)
 // DataReg - собственно значение полученного по сети записываемого или запрошенного по сети читаемого регистра ModBus
 // Address - ModBus адрес этого регистра (не путать с локальным адресом ячейки памяти)
 //------------------------------------------------------
-void WrightModBusReg(struct modbus_slave_unique_registers_map *pRegmap, uint16_t DataReg, uint16_t Address);
+void WrightModBusReg(struct modbus_slave_registers_map_table *pRegistersMapTable, uint16_t DataReg, uint16_t Address);
 
 // Функция поиска заданного регистра ModBus и последующего чтения
 // *pRegmap - экземпляр уникальной карты регистров с которым ведется работа в конкретном случае
 // Address - ModBus адрес этого регистра (не путать с локальным адресом ячейки памяти)
 // возвращаемое значение - требуемое значение регистра ModBus
 //------------------------------------------------------
-uint16_t ReadModBusReg(struct modbus_slave_unique_registers_map *pRegmap, uint16_t Address);
+uint16_t ReadModBusReg(struct modbus_slave_registers_map_table *pRegistersMapTable, uint16_t Address);
 
 #endif // MODBUS_RTU_REGISTERS
 

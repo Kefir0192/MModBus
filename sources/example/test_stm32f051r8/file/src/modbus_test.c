@@ -11,12 +11,11 @@
 // Структура данных ModBusRTU_Slave стека
 struct modbus_rtu_slave ModBusRTU_Slave;
 
-// Указатель на уникальную карту регистров
-struct modbus_slave_unique_registers_map ModBusRTU_Slave_RegMap;
+// Уникальная карта полей таблиц регистров
+struct modbus_slave_registers_map_table ModBusRTU_Slave_RegistersMapTable;
 
-// Это заголовок для каждого подмассива (header)
-// Размер массива равен числу заведенных ModBus-ов
-struct modbus_slave_registers_subarray ModBusRTU_Slave_RegSubarray[2];
+// Таблицы регистров
+struct modbus_slave_registers_table ModBusRTU_Slave_RegistersTable[2];
 
 // RegMap_Table_1
 uint16_t RegMap_Table_1[16];
@@ -33,15 +32,15 @@ void ModBusRTU_Slave_Init_1(void)
 {
     int8_t status = 0;
 
+    ModBus_Slave_Creat_Registers_Map_Table(&ModBusRTU_Slave_RegistersMapTable,
+                                           ModBusRTU_Slave_RegistersTable,
+                                           2);
 
-    ModBus_Slave_Creat_Unique_Reg_Map(&ModBusRTU_Slave_RegSubarray[0],
+    ModBus_Slave_Initialize_Registers_Table(&ModBusRTU_Slave_RegistersTable[0],
                                       RegMap_Table_1, ACCESS_REG_RW, 0, 16);
 
-    ModBus_Slave_Creat_Unique_Reg_Map(&ModBusRTU_Slave_RegSubarray[1],
-                                      RegMap_Table_1, ACCESS_REG_RW, 32, 16);
-
-    ModBusRTU_Slave_RegMap.NumSubArray = 2;
-    ModBusRTU_Slave_RegMap.pHeaders = ModBusRTU_Slave_RegSubarray;
+    ModBus_Slave_Initialize_Registers_Table(&ModBusRTU_Slave_RegistersTable[1],
+                                      RegMap_Table_2, ACCESS_REG_RW, 32, 16);
 
 
     ModBusRTU_Slave.FunctionPeriphery.pModBusRTU_Slave_Disable_Inter_Receiv_Phisic =
@@ -74,7 +73,7 @@ void ModBusRTU_Slave_Init_1(void)
     ModBusRTU_Slave.FunctionPeriphery.pModBusRTU_Slave_UART_Write_Phisic =
             ModBusRTU_Slave_UART_Write_Phisic;
 
-    status = ModBusRTU_Slave_Init(&ModBusRTU_Slave, &ModBusRTU_Slave_RegMap, RxTxBuff, 2);
+    status = ModBusRTU_Slave_Init(&ModBusRTU_Slave, &ModBusRTU_Slave_RegistersMapTable, RxTxBuff, 2);
 
     RegMap_Table_1[0] = 0x01;
     RegMap_Table_1[1] = 0x02;

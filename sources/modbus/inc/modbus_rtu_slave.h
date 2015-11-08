@@ -94,9 +94,8 @@ struct modbus_rtu_slave {
     // Уникальная карта регистров
     //----------------------------------------------------
     struct {
-        // Указатель на уникальную карту регистров для каждого
-        // экземпляра modbus_slave
-        struct modbus_slave_unique_registers_map *pRegisters_map;
+        // Указатель на карту полей таблиц регистров
+        struct modbus_slave_registers_map_table *pRegistersMapTable;
     }Registers_map;
     //----------------------------------------------------
     //
@@ -116,12 +115,12 @@ struct modbus_rtu_slave {
 int8_t ModBusRTU_Slave_Init(
         // Указатель на экземпляр структуры modbus_rtu_slave
         struct modbus_rtu_slave *pModBusRTU_Slave,
-        // Указатель на уникальную карту регистров для каждого  экземпляра modbus_slave
-        struct modbus_slave_unique_registers_map *pRegisters_map,
+        // Указатель на карту полей таблиц регистров
+        struct modbus_slave_registers_map_table *pRegistersMapTable,
         // Указатель на приемопередающий буфер
         uint8_t *pRxTxBuff,
-        // Число подмассивов карт регистров
-        uint8_t	NumSubArray);
+        // Число таблиц регистров
+        uint8_t NumRegistersTable);
 
 // Инициализация адреса и скорости
 //-----------------------------------------------------

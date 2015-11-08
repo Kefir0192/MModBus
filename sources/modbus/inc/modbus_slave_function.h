@@ -14,16 +14,16 @@
 
 // Чтение значений из нескольких регистров хранения
 //------------------------------------------------------
-uint8_t ModBus_0x03_Read_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint8_t *pRxTxBuff);
+uint8_t ModBus_0x03_Read_Registers(struct modbus_slave_registers_map_table *pRegistersMapTable, uint8_t *pRxTxBuff);
 // Чтение значений из нескольких регистров ввода
 //------------------------------------------------------
-uint8_t ModBus_0x04_Read_Input_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint8_t *pRxTxBuff);
+uint8_t ModBus_0x04_Read_Input_Registers(struct modbus_slave_registers_map_table *pRegistersMapTable, uint8_t *pRxTxBuff);
 // Запись значения в один регистр хранения
 //------------------------------------------------------
-uint8_t ModBus_0x06_Write_Single_Register(struct modbus_slave_unique_registers_map *pRegmap, uint8_t *pRxTxBuff);
+uint8_t ModBus_0x06_Write_Single_Register(struct modbus_slave_registers_map_table *pRegistersMapTable, uint8_t *pRxTxBuff);
 // Запись значений в несколько регистров хранения
 //------------------------------------------------------
-uint8_t ModBus_0x10_Write_Multiple_Registers(struct modbus_slave_unique_registers_map *pRegmap, uint8_t *pRxTxBuff);
+uint8_t ModBus_0x10_Write_Multiple_Registers(struct modbus_slave_registers_map_table *pRegistersMapTable, uint8_t *pRxTxBuff);
 // Ответить исключением
 //------------------------------------------------------
 uint8_t ModBus_Exception_Response(uint8_t *pRxTxBuff, uint8_t Exception);
