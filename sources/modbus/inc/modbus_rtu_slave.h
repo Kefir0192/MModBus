@@ -128,7 +128,7 @@ struct modbus_rtu_slave *ModBusRTU_Slave_Creat(
     // Указатель на карту полей таблиц регистров
     struct modbus_slave_registers_map_table *pRegistersMapTable,
     // Размер приемо-передающего буфера
-    uint16_t SezeRxTxBuff);
+    uint16_t SizeRxTxBuff);
 
 
 

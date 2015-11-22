@@ -14,7 +14,7 @@ struct modbus_rtu_slave *ModBusRTU_Slave_Creat(
     // Указатель на карту полей таблиц регистров
     struct modbus_slave_registers_map_table *pRegistersMapTable,
     // Размер приемо-передающего буфера
-    uint16_t SezeRxTxBuff)
+    uint16_t SizeRxTxBuff)
 {
     // pRegistersMapTable != NULL ?
     if(pRegistersMapTable == NULL) return NULL;
@@ -30,7 +30,7 @@ struct modbus_rtu_slave *ModBusRTU_Slave_Creat(
     // Указатель на приемопередающий буфер
     uint8_t *pRxTxBuff;
 
-    pRxTxBuff = (uint8_t *)calloc(SezeRxTxBuff, sizeof(uint8_t));
+    pRxTxBuff = (uint8_t *)calloc(SizeRxTxBuff, sizeof(uint8_t));
 
     // pRxTxBuff != NULL ?
     if(pRxTxBuff == NULL) return NULL;
