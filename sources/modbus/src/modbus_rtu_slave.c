@@ -42,7 +42,7 @@ struct modbus_rtu_slave *ModBusRTU_Slave_Creat(
 }
 
 //-----------------------------------------------------
-// Инициализация ModBusRTU_Slave. Возвращает -1 в случаи ошибки
+// Инициализация ModBusRTU_Slave
 //-----------------------------------------------------
 void ModBusRTU_Slave_Init(
         // Указатель на экземпляр структуры modbus_rtu_slave
