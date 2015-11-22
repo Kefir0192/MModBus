@@ -170,6 +170,7 @@ void ModBusRTU_Slave_Timer_Init(uint8_t Speed)
 //------------------------------------------------------
 void ModBusRTU_Slave_Timer_Start(void)
 {
+    TIM14->CNT = 0;
     TIM14->CR1 |= BIT0;
     TIM14->DIER |= BIT1;
 }
@@ -179,6 +180,7 @@ void ModBusRTU_Slave_Timer_Start(void)
 //------------------------------------------------------
 void ModBusRTU_Slave_Timer_Stop(void)
 {
+    TIM14->CNT = 0;
     TIM14->CR1 &= ~BIT0;
     TIM14->DIER &= ~BIT1;
 }

@@ -7,6 +7,7 @@
 #include "modbus_rtu_slave.h"
 
 
+
 //-----------------------------------------------------
 // Создает новую структуру struct modbus_rtu_slave и возвращает указатель
 //-----------------------------------------------------
@@ -339,6 +340,7 @@ void ModBusRTU_Slave_Service(struct modbus_rtu_slave *pModBusRTU_Slave)
 
     // Выйти если нет новых данных
     if(pModBusRTU_Slave->ReadyRxData != 1) return;
+
     // Запретить прерывание по приему байта
     pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Disable_Inter_Receiv_Phisic();
     // Сбросить флаг - пакет принят
