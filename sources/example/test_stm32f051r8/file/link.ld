@@ -18,6 +18,8 @@ MEMORY
 .ARM.attributes — ARM-специфичные атрибуты файла.
 */
 
+_Min_Heap_Size = 4000;      /* required amount of heap  */
+
 SECTIONS
 {
     .isr_vector : ALIGN(4)
@@ -60,6 +62,15 @@ SECTIONS
         *(.bss)
         *(.bss*)
         _end_bss = .;
+    } > RAM
+
+    .heap :
+    {
+        . = ALIGN(4);
+        PROVIDE(end = .);
+        KEEP(*(.heap))
+        . = . + _Min_Heap_Size;
+        . = ALIGN(4);
     } > RAM
 }
 _size_rodata = SIZEOF(.rodata);

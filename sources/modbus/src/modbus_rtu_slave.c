@@ -1,27 +1,74 @@
 #include "globalincludefile.h"
+#include <stdlib.h>
 #include "crc16.h"
 #include "modbus_code_function.h"
 #include "modbus_slave_registers.h"
 #include "modbus_slave_function.h"
 #include "modbus_rtu_slave.h"
 
+
+//-----------------------------------------------------
+// Создает новую структуру struct modbus_rtu_slave и возвращает указатель
+//-----------------------------------------------------
+struct modbus_rtu_slave *ModBusRTU_Slave_Creat(
+    // Указатель на карту полей таблиц регистров
+    struct modbus_slave_registers_map_table *pRegistersMapTable,
+    // Размер приемо-передающего буфера
+    uint16_t SezeRxTxBuff)
+{
+    // pRegistersMapTable != NULL ?
+    if(pRegistersMapTable == NULL) return NULL;
+
+
+    // Указатель на экземпляр структуры modbus_rtu_slave
+    struct modbus_rtu_slave *pModBusRTU_Slave;
+    pModBusRTU_Slave = (struct modbus_rtu_slave *)calloc(1, sizeof(struct modbus_rtu_slave));
+
+    // pModBusRTU_Slave != NULL ?
+    if(pModBusRTU_Slave == NULL) return NULL;
+
+    // Указатель на приемопередающий буфер
+    uint8_t *pRxTxBuff;
+
+    pRxTxBuff = (uint8_t *)calloc(SezeRxTxBuff, sizeof(uint8_t));
+
+    // pRxTxBuff != NULL ?
+    if(pRxTxBuff == NULL) return NULL;
+
+    pModBusRTU_Slave->Registers_map.pRegistersMapTable = pRegistersMapTable;
+    pModBusRTU_Slave->pRxTxBuff = pRxTxBuff;
+
+    return pModBusRTU_Slave;
+}
+
 //-----------------------------------------------------
 // Инициализация ModBusRTU_Slave. Возвращает -1 в случаи ошибки
 //-----------------------------------------------------
-int8_t ModBusRTU_Slave_Init(
+void ModBusRTU_Slave_Init(
         // Указатель на экземпляр структуры modbus_rtu_slave
         struct modbus_rtu_slave *pModBusRTU_Slave,
         // Указатель на карту полей таблиц регистров
         struct modbus_slave_registers_map_table *pRegistersMapTable,
         // Указатель на приемопередающий буфер
-        uint8_t *pRxTxBuff,
-        // Число таблиц регистров
-        uint8_t NumRegistersTable)
+        uint8_t *pRxTxBuff)
 {
     // pModBusRTU_Slave, pRegistersMapTable, pHeaders and pRxTxBuff != NULL ?
-    if((pModBusRTU_Slave == NULL) || (pRegistersMapTable == NULL) || (pRxTxBuff == NULL)) return -1;
+    if((pModBusRTU_Slave == NULL) || (pRegistersMapTable == NULL) || (pRxTxBuff == NULL)) return;
     pModBusRTU_Slave->Registers_map.pRegistersMapTable = pRegistersMapTable;
     pModBusRTU_Slave->pRxTxBuff = pRxTxBuff;
+    return;
+}
+
+//-----------------------------------------------------
+// Глобальная проверка инициализации структуры struct modbus_rtu_slave
+// Возвращает код ошибки
+//-----------------------------------------------------
+enum ERROR_INIT_MOBDUS_RTU_SLAVE ModBusRTU_Slave_Check_Debug(
+        // Указатель на экземпляр структуры modbus_rtu_slave
+        struct modbus_rtu_slave *pModBusRTU_Slave)
+{
+    // pModBusRTU_Slave != NULL ?
+    if(pModBusRTU_Slave == NULL) return ERROR_modbus_rtu_slave;
 
     // pModBusRTU_Slave->FunctionPeriphery.*p  != NULL ?
     if( (pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Disable_Inter_Receiv_Phisic == NULL) ||
@@ -34,35 +81,28 @@ int8_t ModBusRTU_Slave_Init(
         (pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Start == NULL) ||
         (pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Stop == NULL) ||
         (pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_UART_Init == NULL) ||
-        (pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_UART_Write_Phisic == NULL)) return -2;
+        (pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_UART_Write_Phisic == NULL))
+        return ERROR_FunctionPeriphery;
 
-    // pRegistersTable != NULL ?
-    if(pModBusRTU_Slave->Registers_map.pRegistersMapTable->pRegistersTable== NULL) return -3;
 
-    for(uint8_t counter = 0; counter < NumRegistersTable; counter++) {
+    // pModBusRTU_Slave->Registers_map.pRegistersMapTable != NULL ?
+    if(pModBusRTU_Slave->Registers_map.pRegistersMapTable == NULL)
+        return ERROR_modbus_slave_registers_map_table;
+
+    // pModBusRTU_Slave->Registers_map.pRegistersMapTable->pRegistersTable != NULL ?
+    if(pModBusRTU_Slave->Registers_map.pRegistersMapTable->pRegistersTable == NULL)
+        return ERROR_modbus_slave_registers_table;
+
+    for(uint8_t counter = 0; counter < pModBusRTU_Slave->Registers_map.pRegistersMapTable->NumRegistersTable; counter++) {
         // psubarray != NULL ?
-        if(pModBusRTU_Slave->Registers_map.pRegistersMapTable->pRegistersTable[counter].pRegistersArray == NULL) return -4;
+        if(pModBusRTU_Slave->Registers_map.pRegistersMapTable->pRegistersTable[counter].pRegistersArray == NULL) return ERROR_pRegistersArray;
     }
 
-    //----------------------------
-    // Линия RS-485 на прием
-    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_RTS1_RX();
-    //----------------------------
-    pModBusRTU_Slave->RxPacket = 0;             // Пакет -> рестарт
-    pModBusRTU_Slave->RxByteOffset = 0;         // Указатель на начало буфера
-    //----------------------------
-    pModBusRTU_Slave->RxTimerBytes.Enable = 0;  // Стоп, 1.5 символа не больше
-    pModBusRTU_Slave->RxTimerBytes.Value = 0;   // Текущие значение счетчика
-    //----------------------------
-    pModBusRTU_Slave->RxTimerFrame.Enable = 0;  // Стоп, 3.5 символа минимум
-    pModBusRTU_Slave->RxTimerFrame.Value = 0;   // Текущие значение счетчика
-    //----------------------------
-    pModBusRTU_Slave->TxTimerBytes.Enable = 0;
-    pModBusRTU_Slave->ReadyRxData = 0;          // Нет принятого пакета
-    // Выключаем таймер
-    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Stop();
+    // pModBusRTU_Slave->pRxTxBuff != NULL ?
+    if(pModBusRTU_Slave->pRxTxBuff == NULL)
+        return ERROR_pRxTxBuff;
 
-    return 0;
+    return ERROR_NO;
 }
 
 //-----------------------------------------------------
@@ -75,9 +115,11 @@ void ModBusRTU_Slave_Init_Addr_Speed(struct modbus_rtu_slave *pModBusRTU_Slave, 
 
     pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Disable_Inter_Receiv_Phisic();
     pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Disable_Inter_Trans_Phisic();
+    // Линия RS-485 на прием
     pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_RTS1_RX();
     pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Stop();
 
+    //----------------------------
     pModBusRTU_Slave->RxPacket = 0;             // Пакет -> рестарт
     pModBusRTU_Slave->RxByteOffset = 0;         // Указатель на начало буфера
     //----------------------------

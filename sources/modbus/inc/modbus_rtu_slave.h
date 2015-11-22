@@ -15,6 +15,17 @@ typedef struct {
     uint8_t byte[SIZE_UART_BUFFER];
 }MODBUSBUFFER;
 
+// Коды ошибок инициализации
+enum ERROR_INIT_MOBDUS_RTU_SLAVE {
+    ERROR_NO = 0,
+    ERROR_modbus_rtu_slave = 1,
+    ERROR_FunctionPeriphery = 2,
+    ERROR_modbus_slave_registers_map_table = 3,
+    ERROR_modbus_slave_registers_table = 4,
+    ERROR_pRegistersArray = 5,
+    ERROR_pRxTxBuff = 6
+};
+
 
 /*
  * Нужно реализовать в phisic.
@@ -110,17 +121,33 @@ struct modbus_rtu_slave {
 };
 
 
+
+// Создает новую структуру struct modbus_rtu_slave и возвращает указатель
+//-----------------------------------------------------
+struct modbus_rtu_slave *ModBusRTU_Slave_Creat(
+    // Указатель на карту полей таблиц регистров
+    struct modbus_slave_registers_map_table *pRegistersMapTable,
+    // Размер приемо-передающего буфера
+    uint16_t SezeRxTxBuff);
+
+
+
 // Инициализация ModBusRTU_Slave. Возвращает -1 в случаи ошибки
 //-----------------------------------------------------
-int8_t ModBusRTU_Slave_Init(
+void ModBusRTU_Slave_Init(
+    // Указатель на экземпляр структуры modbus_rtu_slave
+    struct modbus_rtu_slave *pModBusRTU_Slave,
+    // Указатель на карту полей таблиц регистров
+    struct modbus_slave_registers_map_table *pRegistersMapTable,
+    // Указатель на приемопередающий буфер
+    uint8_t *pRxTxBuff);
+
+// Глобальная проверка инициализации структуры struct modbus_rtu_slave
+// Возвращает код ошибки
+//-----------------------------------------------------
+enum ERROR_INIT_MOBDUS_RTU_SLAVE ModBusRTU_Slave_Check_Debug(
         // Указатель на экземпляр структуры modbus_rtu_slave
-        struct modbus_rtu_slave *pModBusRTU_Slave,
-        // Указатель на карту полей таблиц регистров
-        struct modbus_slave_registers_map_table *pRegistersMapTable,
-        // Указатель на приемопередающий буфер
-        uint8_t *pRxTxBuff,
-        // Число таблиц регистров
-        uint8_t NumRegistersTable);
+        struct modbus_rtu_slave *pModBusRTU_Slave);
 
 // Инициализация адреса и скорости
 //-----------------------------------------------------

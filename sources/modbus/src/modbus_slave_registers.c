@@ -1,13 +1,74 @@
 #include "globalincludefile.h"
+#include <stdlib.h>
 #include "modbus_code_function.h"
 #include "modbus_slave_registers.h"
 #include "modbus_slave_function.h"
 
 
 //-----------------------------------------------------
-// Создать карту таблиц регистров
+// Создает карту таблиц регистров и возвращает указатель
 //-----------------------------------------------------
-void ModBus_Slave_Creat_Registers_Map_Table(
+struct modbus_slave_registers_map_table *ModBus_Slave_Creat_Registers_Map_Table(
+    // Число таблиц регистров
+    uint8_t NumRegistersTable)
+{
+    // Уникальная карта регистров для каждого экземпляра modbus_slave
+    struct modbus_slave_registers_map_table *pRegistersMapTable;
+
+    pRegistersMapTable = (struct modbus_slave_registers_map_table *)calloc(1, sizeof(struct modbus_slave_registers_map_table));
+
+    // pRegistersMapTable != NULL ?
+    if(pRegistersMapTable == NULL) return NULL;
+
+    // Указатель на массив таблиц регистров
+    struct modbus_slave_registers_table *pRegistersTable;
+
+    pRegistersTable = (struct modbus_slave_registers_table *)calloc(NumRegistersTable, sizeof(struct modbus_slave_registers_table));
+
+    // pRegistersTable != NULL ?
+    if(pRegistersTable == NULL) return NULL;
+
+    pRegistersMapTable->pRegistersTable = pRegistersTable;
+    pRegistersMapTable->NumRegistersTable = NumRegistersTable;
+
+    return pRegistersMapTable;
+}
+
+//-----------------------------------------------------
+// Создает таблицу регистров и возвращает указатель
+//-----------------------------------------------------
+uint16_t *ModBus_Slave_Creat_Registers_Table(
+    // Таблицы регистров
+    struct modbus_slave_registers_table  *pRegistersTable,
+    // Доступ к регистрам
+    uint8_t  ACCESS,
+    // Стартовый адрес
+    uint16_t START_ADDR,
+    // Размер массива
+    uint16_t SIZE_ARR)
+{
+    // pRegistersTable and pRegistersArray != NULL ?
+    if(pRegistersTable == NULL) return NULL;
+
+    // Указатель на массив ячеек регистров
+    uint16_t *pRegistersArray;
+
+    pRegistersArray = (uint16_t *)calloc(SIZE_ARR, sizeof(uint16_t));
+    // pRegistersArray != NULL ?
+    if(pRegistersArray == NULL) return NULL;
+
+    pRegistersTable->ACCESS = ACCESS;
+    pRegistersTable->START_ADDR = START_ADDR;
+    pRegistersTable->SIZE_ARR = SIZE_ARR;
+    pRegistersTable->pRegistersArray = pRegistersArray;
+
+    return pRegistersArray;
+}
+
+//-----------------------------------------------------
+// Инициализирует карту таблиц регистров
+//-----------------------------------------------------
+void ModBus_Slave_Init_Registers_Map_Table(
     // Уникальная карта регистров для каждого экземпляра modbus_slave
     struct modbus_slave_registers_map_table *pRegistersMapTable,
     // Указатель на массив таблиц регистров
@@ -22,7 +83,7 @@ void ModBus_Slave_Creat_Registers_Map_Table(
 //-----------------------------------------------------
 // Инициализировать таблицу регистров
 //-----------------------------------------------------
-void ModBus_Slave_Initialize_Registers_Table(
+void ModBus_Slave_Init_Registers_Table(
     // Таблицы регистров
     struct modbus_slave_registers_table  *pRegistersTable,
     // Указатель на массив ячеек регистров

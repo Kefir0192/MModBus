@@ -58,9 +58,27 @@ struct modbus_slave_registers_map_table {
 };
 
 
-// Создать карту таблиц регистров
+// Создает карту таблиц регистров и возвращает указатель
 //-----------------------------------------------------
-void ModBus_Slave_Creat_Registers_Map_Table(
+struct modbus_slave_registers_map_table *ModBus_Slave_Creat_Registers_Map_Table(
+    // Число таблиц регистров
+    uint8_t NumRegistersTable);
+
+// Создает таблицу регистров и возвращает указатель
+//-----------------------------------------------------
+uint16_t *ModBus_Slave_Creat_Registers_Table(
+    // Таблицы регистров
+    struct modbus_slave_registers_table  *pRegistersTable,
+    // Доступ к регистрам
+    uint8_t  ACCESS,
+    // Стартовый адрес
+    uint16_t START_ADDR,
+    // Размер массива
+    uint16_t SIZE_ARR);
+
+// Инициализирует карту таблиц регистров
+//-----------------------------------------------------
+void ModBus_Slave_Init_Registers_Map_Table(
     // Уникальная карта регистров для каждого экземпляра modbus_slave
     struct modbus_slave_registers_map_table *pRegistersMapTable,
     // Указатель на массив таблиц регистров
@@ -70,7 +88,7 @@ void ModBus_Slave_Creat_Registers_Map_Table(
 
 // Инициализировать таблицу регистров
 //-----------------------------------------------------
-void ModBus_Slave_Initialize_Registers_Table(
+void ModBus_Slave_Init_Registers_Table(
     // Таблицы регистров
     struct modbus_slave_registers_table  *pRegistersTable,
     // Указатель на массив ячеек регистров

@@ -45,7 +45,6 @@ void ModBusRTU_Slave_RTS1_TX(void)
 //------------------------------------------------------
 void ModBusRTU_Slave_UART_Init(uint8_t Speed)
 {
-    GPIOC->ODR |= GPIO_ODR_9;
     // Включить тактирование порта А
     RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
     // Включаем тактирование USART1
@@ -120,11 +119,11 @@ void USART1_IRQHandler(void)
     if((USART1->ISR & USART_ISR_TC) && (USART1->CR1&USART_CR1_TCIE)) {
         USART1->ICR &= ~ USART_ICR_TCCF;
         // Прерывание байт отправлен
-        ModBusRTU_Slave_InterBytes_Sent(&ModBusRTU_Slave);
+        ModBusRTU_Slave_InterBytes_Sent(pModBusRTU_Slave);
     }
     if((USART1->ISR&USART_ISR_RXNE)) {
         // Прерывание байта принят
-        ModBusRTU_Slave_Byte_Read(&ModBusRTU_Slave, USART1->RDR);
+        ModBusRTU_Slave_Byte_Read(pModBusRTU_Slave, USART1->RDR);
     }
 }
 
@@ -191,7 +190,7 @@ void TIM14_IRQHandler(void)
 {
     if((TIM14->SR&BIT0)) {
         TIM14->SR &= ~BIT0;
-        ModBusRTU_Slave_TimerTic(&ModBusRTU_Slave);
+        ModBusRTU_Slave_TimerTic(pModBusRTU_Slave);
         GPIOC->ODR ^= GPIO_ODR_8;
     }
 }

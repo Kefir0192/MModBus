@@ -11,6 +11,10 @@ PATH_BIN   =$(PATH_PROJ)bin/
 PATH_SRC   =$(PATH_PROJ)src/
 PATH_INC   =$(PATH_PROJ)inc/
 
+LIB_TOOL   =/usr/lib/arm-none-eabi/lib/armv6-m/
+LIB_GCC    =/usr/lib/gcc/arm-none-eabi/4.8.2/armv6-m/
+LIB_OP     =-L$(LIB_TOOL) -lc -lg -lnosys -L$(LIB_GCC) -lgcc 
+
 CC         =$(TOOLCHAIN)arm-none-eabi-gcc
 AS         =$(TOOLCHAIN)arm-none-eabi-as
 LD         =$(TOOLCHAIN)arm-none-eabi-ld
@@ -108,7 +112,7 @@ AFOBJ= \
 
 .PHONY : all
 all: $(AFOBJ) $(MModBus_opj)
-	@$(LD) -o $(PATH_BIN)$(NAMEPROJ).elf $(LINKOP) $(AFOBJ) $(LIB_OP) $(MModBus_opj)
+	@$(LD) $(AFOBJ) $(MModBus_opj) $(LINKOP) $(LIB_OP) -o $(PATH_BIN)$(NAMEPROJ).elf
 	@$(OBJDUMP) -D $(PATH_BIN)$(NAMEPROJ).elf > $(PATH_BIN)$(NAMEPROJ).asm
 	@$(OBJCOPY) $(PATH_BIN)$(NAMEPROJ).elf $(PATH_BIN)$(NAMEPROJ).bin -O binary
 	

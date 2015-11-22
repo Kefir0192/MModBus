@@ -8,78 +8,73 @@
 #include "modbus_test.h"
 
 
+
 // Структура данных ModBusRTU_Slave стека
-struct modbus_rtu_slave ModBusRTU_Slave;
+struct modbus_rtu_slave *pModBusRTU_Slave;
 
 // Уникальная карта полей таблиц регистров
-struct modbus_slave_registers_map_table ModBusRTU_Slave_RegistersMapTable;
-
-// Таблицы регистров
-struct modbus_slave_registers_table ModBusRTU_Slave_RegistersTable[2];
+struct modbus_slave_registers_map_table *pModBusRTU_Slave_RegistersMapTable;
 
 // RegMap_Table_1
-uint16_t RegMap_Table_1[16];
+uint16_t *pRegMap_Table_1;
 // RegMap_Table_2
-uint16_t RegMap_Table_2[16];
+uint16_t *pRegMap_Table_2;
 
-// RxTxBuff
-uint8_t RxTxBuff[256];
+
 
 //------------------------------------------------------
 // ModBusRTU_Slave_Init_1
 //------------------------------------------------------
 void ModBusRTU_Slave_Init_1(void)
 {
-    int8_t status = 0;
+    pModBusRTU_Slave_RegistersMapTable = ModBus_Slave_Creat_Registers_Map_Table(2);
 
-    ModBus_Slave_Creat_Registers_Map_Table(&ModBusRTU_Slave_RegistersMapTable,
-                                           ModBusRTU_Slave_RegistersTable,
-                                           2);
+    while(pModBusRTU_Slave_RegistersMapTable == NULL);
 
-    ModBus_Slave_Initialize_Registers_Table(&ModBusRTU_Slave_RegistersTable[0],
-                                      RegMap_Table_1, ACCESS_REG_RW, 0, 16);
+    pRegMap_Table_1 = ModBus_Slave_Creat_Registers_Table(&pModBusRTU_Slave_RegistersMapTable->pRegistersTable[0],
+            ACCESS_REG_RW, 0, 16);
 
-    ModBus_Slave_Initialize_Registers_Table(&ModBusRTU_Slave_RegistersTable[1],
-                                      RegMap_Table_2, ACCESS_REG_RW, 32, 16);
+    while(pRegMap_Table_1 == NULL);
+
+    pRegMap_Table_2 = ModBus_Slave_Creat_Registers_Table(&pModBusRTU_Slave_RegistersMapTable->pRegistersTable[1],
+            ACCESS_REG_RW, 0xff, 16);
+
+    while(pRegMap_Table_2 == NULL);
 
 
-    ModBusRTU_Slave.FunctionPeriphery.pModBusRTU_Slave_Disable_Inter_Receiv_Phisic =
+    pModBusRTU_Slave = ModBusRTU_Slave_Creat(pModBusRTU_Slave_RegistersMapTable, 255);
+    while(pModBusRTU_Slave == NULL);
+
+
+    //------------------------
+    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Disable_Inter_Receiv_Phisic =
             ModBusRTU_Slave_Disable_Inter_Receiv_Phisic;
 
-    ModBusRTU_Slave.FunctionPeriphery.pModBusRTU_Slave_Disable_Inter_Trans_Phisic =
+    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Disable_Inter_Trans_Phisic =
             ModBusRTU_Slave_Disable_Inter_Trans_Phisic;
 
-    ModBusRTU_Slave.FunctionPeriphery.pModBusRTU_Slave_Enable_Inter_Receiv_Phisic =
+    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Enable_Inter_Receiv_Phisic =
             ModBusRTU_Slave_Enable_Inter_Receiv_Phisic;
 
-    ModBusRTU_Slave.FunctionPeriphery.pModBusRTU_Slave_Enable_Inter_Trans_Phisic =
+    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Enable_Inter_Trans_Phisic =
             ModBusRTU_Slave_Enable_Inter_Trans_Phisic;
 
-    ModBusRTU_Slave.FunctionPeriphery.pModBusRTU_Slave_RTS1_RX = ModBusRTU_Slave_RTS1_RX;
-    ModBusRTU_Slave.FunctionPeriphery.pModBusRTU_Slave_RTS1_TX = ModBusRTU_Slave_RTS1_TX;
+    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_RTS1_RX = ModBusRTU_Slave_RTS1_RX;
+    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_RTS1_TX = ModBusRTU_Slave_RTS1_TX;
 
-    ModBusRTU_Slave.FunctionPeriphery.pModBusRTU_Slave_Timer_Init =
+    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Init =
             ModBusRTU_Slave_Timer_Init;
 
-    ModBusRTU_Slave.FunctionPeriphery.pModBusRTU_Slave_Timer_Start =
+    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Start =
             ModBusRTU_Slave_Timer_Start;
 
-    ModBusRTU_Slave.FunctionPeriphery.pModBusRTU_Slave_Timer_Stop =
+    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Timer_Stop =
             ModBusRTU_Slave_Timer_Stop;
 
-    ModBusRTU_Slave.FunctionPeriphery.pModBusRTU_Slave_UART_Init =
+    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_UART_Init =
             ModBusRTU_Slave_UART_Init;
 
-    ModBusRTU_Slave.FunctionPeriphery.pModBusRTU_Slave_UART_Write_Phisic =
+    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_UART_Write_Phisic =
             ModBusRTU_Slave_UART_Write_Phisic;
-
-    status = ModBusRTU_Slave_Init(&ModBusRTU_Slave, &ModBusRTU_Slave_RegistersMapTable, RxTxBuff, 2);
-
-    RegMap_Table_1[0] = 0x01;
-    RegMap_Table_1[1] = 0x02;
-
-    RegMap_Table_2[0] = 0x03;
-    RegMap_Table_2[1] = 0x04;
-
-    if(status != 0) GPIOC->ODR |= GPIO_ODR_8;
+    //------------------------
 }
