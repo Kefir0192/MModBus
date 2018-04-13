@@ -34,10 +34,11 @@ int main(void)
     ModBusRTU_Slave_Init_1();
     ModBusRTU_Slave_Init_Addr_Speed(pModBusRTU_Slave, 0x01, SP_9600);
 
+
     // Коды ошибок инициализации
     switch(ModBusRTU_Slave_Check_Debug(pModBusRTU_Slave)) {
         case ERROR_NO: {
-            //GPIOC->ODR |= GPIO_ODR_8;
+            GPIOC->ODR |= GPIO_ODR_8;
             break;
         }
         case ERROR_modbus_rtu_slave: {

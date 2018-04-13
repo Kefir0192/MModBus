@@ -272,7 +272,7 @@ void ModBusRTU_Slave_TimerTic(struct modbus_rtu_slave *pModBusRTU_Slave)
             pModBusRTU_Slave->RxTimerFrame.Enable = 0;
             pModBusRTU_Slave->RxTimerFrame.Value = 0;
             // Проверить адрес
-            if(pModBusRTU_Slave->pRxTxBuff[0] == pModBusRTU_Slave->DeviceAddrSpeed.Addr)
+            if((pModBusRTU_Slave->pRxTxBuff[0] == pModBusRTU_Slave->DeviceAddrSpeed.Addr) && (pModBusRTU_Slave->RxByteOffset > 3))
             {
                 // Подсчитать контрольную сумму
                 // CRC

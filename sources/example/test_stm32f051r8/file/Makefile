@@ -1,19 +1,24 @@
 #===========================================================================
 # MAIN
 #===========================================================================
-NAMEPROJ   =test_stm32f051r8
+TARGET     = test_stm32f051r8
 
-TOOLCHAIN  =
-PATH_PROJ  =../file/
-PATH_INCLU =$(PATH_PROJ)
 
-PATH_BIN   =$(PATH_PROJ)bin/
-PATH_SRC   =$(PATH_PROJ)src/
-PATH_INC   =$(PATH_PROJ)inc/
 
-LIB_TOOL   =/usr/lib/arm-none-eabi/lib/armv6-m/
-LIB_GCC    =/usr/lib/gcc/arm-none-eabi/4.8.2/armv6-m/
-LIB_OP     =-L$(LIB_TOOL) -lc -lg -lnosys -L$(LIB_GCC) -lgcc 
+#===========================================================================
+# BIN
+#===========================================================================
+RM         = del /Q null 2>&1
+CAT        = type null 2>&1
+
+
+
+#===========================================================================
+# TOOLCHAIN
+#===========================================================================
+TOOLCHAIN  =F:/microcontrollers/gcc-arm-none-eabi/bin/
+
+
 
 CC         =$(TOOLCHAIN)arm-none-eabi-gcc
 AS         =$(TOOLCHAIN)arm-none-eabi-as
@@ -21,118 +26,146 @@ LD         =$(TOOLCHAIN)arm-none-eabi-ld
 OBJDUMP    =$(TOOLCHAIN)arm-none-eabi-objdump
 OBJCOPY    =$(TOOLCHAIN)arm-none-eabi-objcopy
 SIZE       =$(TOOLCHAIN)arm-none-eabi-size
+GCC        =$(CC)
 
 
 
 #===========================================================================
-# MModBus
+# SUBDIRS
 #===========================================================================
-# Рабочий каталог
-MModBus_p_modbus    =../../../modbus/
+SUBDIRS     = 	./src/ \
+				../../../modbus/src/
 
 
-# Дополнительные пути
-MModBus_p_modbus_inc=$(MModBus_p_modbus)inc/
-MModBus_p_modbus_src=$(MModBus_p_modbus)src/
+				
+SRC_TEMPLATE = $(addsuffix *.cpp, $(SUBDIRS)) \
+               $(addsuffix *.c,   $(SUBDIRS)) \
+               $(addsuffix *.S,   $(SUBDIRS))
 
-# Дополнительные включения
-MModBus_p_modbus_I= \
-          -I$(MModBus_p_modbus_inc)
 
-MModBus_inc= \
-	$(MModBus_p_modbus_inc)crc16.h \
-	$(MModBus_p_modbus_inc)modbus_code_function.h \
-	$(MModBus_p_modbus_inc)modbus_slave_registers.h \
-	$(MModBus_p_modbus_inc)modbus_slave_function.h \
-	$(MModBus_p_modbus_inc)modbus_rtu_portable.h \
-	$(MModBus_p_modbus_inc)modbus_rtu_master.h \
-	$(MModBus_p_modbus_inc)modbus_rtu_slave.h
+SOURCES = $(wildcard $(SRC_TEMPLATE))
+
+
+OBJECTS  := $(patsubst %.c,  %.o, $(SOURCES) )
+OBJECTS  := $(patsubst %.cpp,%.o, $(OBJECTS) )
+OBJECTS  := $(patsubst %.S,  %.o, $(OBJECTS) )
+
+#===========================================================================
+# SUBDIRS INCLUDE
+#===========================================================================
+SUBDIRS_INC = 	./inc/ \
+				./inc/cmsis/ \
+				./inc/cmsis/Include \
+				../../../modbus/inc
+
+
+
+INC_TEMPLATE = $(addprefix -I, $(SUBDIRS_INC))
+
+#===========================================================================
+# ARCH FLAGS
+#===========================================================================
+AFLAGS	     = -mcpu=cortex-m0
+AFLAGS	    += -mthumb
+AFLAGS	    += -O0
+
+#===========================================================================
+# C FLAGS
+#===========================================================================
+CFLAGS	     = $(AFLAGS)
+CFLAGS	    += -std=c99
+CFLAGS	    += -g
+CFLAGS	    += -Wall
+CFLAGS	    += $(AFLAGS)
+CFLAGS	    += $(INC_TEMPLATE)
+
+#===========================================================================
+# LINKER FLAGS
+#===========================================================================
+LDFLAGS      = $(AFLAGS)
+LDFLAGS     += -T link.ld
+LDFLAGS     += -nostartfiles
+LDFLAGS	    += --specs=nano.specs
+LDFLAGS	    += --specs=nosys.specs
+
+
+
+
+#release
+.PHONY: all
+all: release
+.DEFAULT_GOAL := all
+
+
+
+.PHONY: release
+release: $(TARGET)
+
+
+
+$(TARGET): CFLAGS := -s $(CFLAGS)
+$(TARGET): $(OBJECTS) .depend
+	$(call build_bin, $(OBJECTS))
+	$(call build_copy)
+
+
 	
-MModBus_opj= \
-	crc16.o \
-	modbus_slave_registers.o \
-	modbus_slave_function.o \
-	modbus_rtu_portable.o \
-	modbus_rtu_master.o \
-	modbus_rtu_slave.o
+# Build release objects
+%.o: %.c
+	$(call build_object)
+
+
+%.o: %.cpp
+	$(call build_object)
+
+
+%.o: %.S
+	$(call build_object)
 
 
 
-crc16.o: $(MModBus_p_modbus_src)crc16.c $(MModBus_inc)
-	$(CC) $(COMPILOP) -c $(MModBus_p_modbus_src)crc16.c -o crc16.o
-
-modbus_slave_registers.o: $(MModBus_p_modbus_src)modbus_slave_registers.c $(MModBus_inc)
-	$(CC) $(COMPILOP) -c $(MModBus_p_modbus_src)modbus_slave_registers.c -o modbus_slave_registers.o
-
-modbus_slave_function.o: $(MModBus_p_modbus_src)modbus_slave_function.c $(MModBus_inc)
-	$(CC) $(COMPILOP) -c $(MModBus_p_modbus_src)modbus_slave_function.c -o modbus_slave_function.o
-	
-modbus_rtu_portable.o: $(MModBus_p_modbus_src)modbus_rtu_portable.c $(MModBus_inc)
-	$(CC) $(COMPILOP) -c $(MModBus_p_modbus_src)modbus_rtu_portable.c -o modbus_rtu_portable.o
-	
-modbus_rtu_master.o: $(MModBus_p_modbus_src)modbus_rtu_master.c $(MModBus_inc)
-	$(CC) $(COMPILOP) -c $(MModBus_p_modbus_src)modbus_rtu_master.c -o modbus_rtu_master.o
-	
-modbus_rtu_slave.o: $(MModBus_p_modbus_src)modbus_rtu_slave.c $(MModBus_inc)
-	$(CC) $(COMPILOP) -c $(MModBus_p_modbus_src)modbus_rtu_slave.c -o modbus_rtu_slave.o
-
-
-
-#===========================================================================
-# MAIN FLAGS COMPIL
-#===========================================================================
-MAIN_I     =-I$(PATH_INC) \
-            -I$(PATH_INC)cmsis \
-            -I$(PATH_INC)cmsis/Include \
-			$(MModBus_p_modbus_I)
-
-			
-COMPILOP   =-g -O0 -nostdlib -ffreestanding -Wall -mthumb  -mcpu=cortex-m0 $(MAIN_I) -std=c99
-ASMOP      =-g -Wall -mthumb  -mcpu=cortex-m0 $(MAIN_I)
-LINKOP     =-T link.ld -Map=$(PATH_BIN)$(NAMEPROJ).map
-
-
-
-#===========================================================================
-# MAIN
-#===========================================================================
-AFINC= \
-	$(PATH_INC)globalincludefile.h \
-	$(PATH_INC)main.h \
-	$(PATH_INC)startup_stm32f0xx.h \
-	$(PATH_INC)phisic.h \
-	$(PATH_INC)modbus_test.h
-
-AFOBJ= \
-	startup_stm32f0xx.o \
-	main.o \
-	phisic.o \
-	modbus_test.o
-
-
-.PHONY : all
-all: $(AFOBJ) $(MModBus_opj)
-	@$(LD) $(AFOBJ) $(MModBus_opj) $(LINKOP) $(LIB_OP) -o $(PATH_BIN)$(NAMEPROJ).elf
-	@$(OBJDUMP) -D $(PATH_BIN)$(NAMEPROJ).elf > $(PATH_BIN)$(NAMEPROJ).asm
-	@$(OBJCOPY) $(PATH_BIN)$(NAMEPROJ).elf $(PATH_BIN)$(NAMEPROJ).bin -O binary
-	
-
-startup_stm32f0xx.o: $(PATH_SRC)startup_stm32f0xx.c $(AFINC)
-	$(CC) $(COMPILOP) -c $(PATH_SRC)startup_stm32f0xx.c -o startup_stm32f0xx.o
-	
-phisic.o: $(PATH_SRC)phisic.c $(AFINC)
-	$(CC) $(COMPILOP) -c $(PATH_SRC)phisic.c -o phisic.o
-
-main.o: $(PATH_SRC)main.c $(AFINC)
-	$(CC) $(COMPILOP) -c $(PATH_SRC)main.c -o main.o
-#===========================================================================
-# All
-#===========================================================================
-modbus_test.o: $(PATH_SRC)modbus_test.c $(AFINC)
-	$(CC) $(COMPILOP) -c $(PATH_SRC)modbus_test.c -o modbus_test.o
-	
-#===========================================================================
-.PHONY : clean
+.PHONY: clean
 clean:
-	-@rm *.o
-	-@$(SIZE) $(PATH_BIN)$(NAMEPROJ).elf
+	-@$(RM) $(OBJECTS)
+	-@$(RM) .depend
+	-@$(DEL) *.*~
+	-@$(DEL) $(TARGET)
+
+
+
+
+
+.depend: cmd  = echo [depend]: $(var) &
+.depend: cmd += $(GCC) $(CFLAGS) -MT ".depend $(basename $(var)).o $(basename $(var))_$(DEBUG_SUFFIX).o"  -MM $(var) >> .depend &
+.depend:
+	-@$(RM) .depend
+	@$(foreach var, $(SOURCES), $(cmd))
+
+
+ifneq "$(MAKECMDGOALS)" "clean"
+    include $(wildcard .depend)
+endif
+
+
+
+
+
+define build_object
+    @echo [build_object]: $@
+    $(GCC) $(CFLAGS) -c $< -o $@  
+endef
+
+
+
+define build_bin
+    @echo [build_bin]: $@.elf
+    $(GCC) $(LDFLAGS) $1 -o $@.elf
+endef
+
+
+
+define build_copy
+    @echo [build_copy]: $@.bin
+	@$(OBJCOPY) $@.elf $@.bin -O binary
+endef
+	

@@ -193,6 +193,5 @@ void TIM14_IRQHandler(void)
     if((TIM14->SR&BIT0)) {
         TIM14->SR &= ~BIT0;
         ModBusRTU_Slave_TimerTic(pModBusRTU_Slave);
-        GPIOC->ODR ^= GPIO_ODR_8;
     }
 }
