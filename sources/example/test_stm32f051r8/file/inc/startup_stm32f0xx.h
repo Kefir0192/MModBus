@@ -1,7 +1,7 @@
 #ifndef STARTUP_H
 #define STARTUP_H
 
-#define STACK_TOP 0x20001FFF
+#define STACK_TOP 0x20001FFC
 #define ISR_VECTOR __attribute__ ((section(".isr_vector")))
 #define DATA_FLASH __attribute__ ((section(".data_flash")))
 
@@ -48,11 +48,19 @@ void USART2_IRQHandler(void);
 void CEC_IRQHandler(void);
 void BootRAM(void);
 
+
+
 extern const ISR_VECTOR POINTER_ITERRAPT ArrayInterrapt[];
 
-extern void *_start_rodata_copi, *_start_rodata, *_end_rodata,
-                *_start_data_copi, *_start_data, *_end_data,
-                *_start_bss_copi, *_start_bss, *_end_bss, *_size_bss;
+extern uint32_t __load_data_LMA,
+                __start_data,
+                __end_data,
+
+                __load_bss_LMA,
+                __start_bss,
+                __end_bss;
+
+
 
 #endif // STARTUP_H
 

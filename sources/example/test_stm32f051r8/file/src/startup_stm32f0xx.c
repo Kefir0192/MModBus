@@ -70,29 +70,30 @@ void loop(void)
     }
 }
 
-// .rodata — глобальные и статические переменные;
-// .data — глобальные и статические переменные;
-void ro_data_init(void *pStartOUT, void *pStartIN, void *pEndIN)
+// .data
+static void __initialize_section(uint32_t *load, uint32_t *start, uint32_t *stop)
 {
-    while(pStartIN != pEndIN) *((uint8_t *)pStartIN++) = *((uint8_t *)pStartOUT++);
+    while(start < stop)
+        *start++ = *load++;
 }
-// .bss — глобальные и статические переменные, которые при старте содержат нулевое значение.
-void bss_init(void *pStartIN, void *pEndIN)
+
+// .bss
+static void __initialize_bss(uint32_t *start, uint32_t *stop)
 {
-    void *p = 0x00;
-    while(p++ != pEndIN) *((uint8_t *)pStartIN++) = 0x00;
+    while(start < stop)
+        *start++ = 0x00;
 }
 
 // Начало
 void Reset_Handler(void)
 {
-    // .rodata — глобальные и статические переменные;
-    ro_data_init(&_start_rodata_copi, &_start_rodata, &_end_rodata);
     // .data — глобальные и статические переменные;
-    ro_data_init(&_start_data_copi, &_start_data, &_end_data);
+    __initialize_section(&__load_data_LMA, &__start_data, &__end_data);
     // .bss — глобальные и статические переменные, которые при старте содержат нулевое значение.
-    bss_init(&_start_bss, &_size_bss);
+    __initialize_bss(&__start_bss, &__end_bss);
+
     // Начало работы
     main();
     // Выход из main
+    while(1);
 }
