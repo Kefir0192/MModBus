@@ -148,7 +148,6 @@ void ModBusRTU_Slave_Byte_Read(struct modbus_rtu_slave *pModBusRTU_Slave, uint8_
         // Иначе херим пакет
         if(pModBusRTU_Slave->RxTimerBytes.Value <= MODBUSRTUSLAVE_PERIOD_15_MAX)
         {
-            // Слухай! -А ? У нас буфер не переполнен ? - *** знает! - ...окай.
             if(pModBusRTU_Slave->RxByteOffset <= SIZE_UART_BUFFER)
             {
                 // Записываем байт в буфер
@@ -291,6 +290,13 @@ void ModBusRTU_Slave_Byte_Write(struct modbus_rtu_slave *pModBusRTU_Slave, uint8
 
     *(pModBusRTU_Slave->pRxTxBuff + ByteNumber + 1) = RETURN_HIGH(crc);
     *(pModBusRTU_Slave->pRxTxBuff + ByteNumber) = RETURN_LOW(crc);
+
+    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_RTS1_TX();
+
+
+    // Передача байта
+    pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_UART_Write_Phisic(pModBusRTU_Slave->pRxTxBuff[pModBusRTU_Slave->Counter++]);
+
     // Разрешить прерывание по окончанию передачи байта
     pModBusRTU_Slave->FunctionPeriphery.pModBusRTU_Slave_Enable_Inter_Trans_Phisic();
 }

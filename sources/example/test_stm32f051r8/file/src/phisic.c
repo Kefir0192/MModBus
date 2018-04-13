@@ -30,14 +30,14 @@ void Port_Init(void)
 //------------------------------------------------------
 void ModBusRTU_Slave_RTS1_RX(void)
 {
-
+    GPIOC->ODR &= ~GPIO_ODR_6;
 }
 
 // Направление линии на передачу
 //------------------------------------------------------
 void ModBusRTU_Slave_RTS1_TX(void)
 {
-
+    GPIOC->ODR |= GPIO_ODR_6;
 }
 
 //------------------------------------------------------
@@ -50,14 +50,15 @@ void ModBusRTU_Slave_UART_Init(uint8_t Speed)
     // Включаем тактирование USART1
     RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
 
-    GPIOA->MODER   |= GPIO_MODER_MODER9_1 | GPIO_MODER_MODER10_1;          // PA9 (TX) - Alternate function mode
-    GPIOA->OSPEEDR |= GPIO_OSPEEDER_OSPEEDR9 | GPIO_OSPEEDER_OSPEEDR10;       // PA9 (TX) - High speed
+    GPIOA->MODER   |= GPIO_MODER_MODER9_1 | GPIO_MODER_MODER10_1;          // PA10 (RX)
+    GPIOA->OSPEEDR |= GPIO_OSPEEDER_OSPEEDR9 | GPIO_OSPEEDER_OSPEEDR10;       // PA9 (TX)
     GPIOA->AFR[1]    |= 0x0110;                     // ????????????????????
 
     RCC->CFGR3     &= ~RCC_CFGR3_USART1SW;
-    RCC->CFGR3     |=  RCC_CFGR3_USART1SW_0;        //System clock (SYSCLK) selected as USART1 clock
+    RCC->CFGR3     |=  RCC_CFGR3_USART1SW_0;
 
 
+    USART1->CR1 = 0x0;
     USART1->CR1 &= ~USART_CR1_M;                    //Данные - 8 бит
     USART1->CR2 &= ~USART_CR2_STOP;                 //1 стоп-бит
     USART1->BRR = BR_UART[Speed];   //скорость usart
@@ -73,7 +74,7 @@ void ModBusRTU_Slave_UART_Init(uint8_t Speed)
 //------------------------------------------------------
 void ModBusRTU_Slave_Enable_Inter_Trans_Phisic(void)
 {
-    USART1->CR1 |= USART_CR1_TCIE;
+    USART1->CR1 |= USART_CR1_TXEIE;
 }
 
 //------------------------------------------------------
@@ -81,7 +82,7 @@ void ModBusRTU_Slave_Enable_Inter_Trans_Phisic(void)
 //------------------------------------------------------
 void ModBusRTU_Slave_Disable_Inter_Trans_Phisic(void)
 {
-    USART1->CR1 &= ~USART_CR1_TCIE;
+    USART1->CR1 &= ~USART_CR1_TXEIE;
 }
 
 //------------------------------------------------------
@@ -116,14 +117,29 @@ void ModBusRTU_Slave_UART_Write_Phisic(uint8_t Data)
 //------------------------------------------------------
 void USART1_IRQHandler(void)
 {
-    if((USART1->ISR & USART_ISR_TC) && (USART1->CR1&USART_CR1_TCIE)) {
-        USART1->ICR &= ~ USART_ICR_TCCF;
+    if((USART1->ISR & USART_ISR_TXE) && (USART1->CR1 & USART_CR1_TXEIE)) {
+        USART1->RQR |= USART_RQR_TXFRQ;
         // Прерывание байт отправлен
         ModBusRTU_Slave_InterBytes_Sent(&ModBusRTU_Slave);
     }
-    if((USART1->ISR&USART_ISR_RXNE)) {
+
+    if((USART1->ISR & USART_ISR_RXNE) && (USART1->CR1 & USART_CR1_RXNEIE)) {
+        USART1->RQR |= USART_RQR_RXFRQ;
         // Прерывание байта принят
         ModBusRTU_Slave_Byte_Read(&ModBusRTU_Slave, USART1->RDR);
+    }
+
+    if((USART1->ISR & USART_ISR_FE)) {
+        // Сброс бита ошибки
+        USART1->ICR |= USART_ICR_FECF;
+    }
+
+    if(USART1->ISR & USART_ISR_ORE) {
+        USART1->ICR |= USART_ISR_ORE;
+    }
+
+    if(USART1->ISR & USART_ISR_NE) {
+        USART1->ICR |= USART_ISR_NE;
     }
 }
 

@@ -17,7 +17,7 @@ const ISR_VECTOR POINTER_ITERRAPT ArrayInterrapt[] = {
     (POINTER_ITERRAPT)STACK_TOP,    /*!< The initial stack pointer              */
     Reset_Handler,                  /*!< Reset Handler                          */
     loop, // NMI_Handler,
-    loop, // HardFault_Handler,
+    HardFault_Handler,
     0, 0, 0, 0, 0, 0, 0,
     loop, // SVC_Handler,
     0, 0,
