@@ -86,7 +86,7 @@ LDFLAGS      = $(AFLAGS)
 LDFLAGS     += -T link.ld
 LDFLAGS     += -nostartfiles
 LDFLAGS	    += --specs=nano.specs
-LDFLAGS	    += --specs=nosys.specs
+#LDFLAGS	    += --specs=nosys.specs
 
 
 

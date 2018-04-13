@@ -1,5 +1,4 @@
 #include "globalincludefile.h"
-#include <stdlib.h>
 #include "crc16.h"
 #include "modbus_code_function.h"
 #include "modbus_slave_registers.h"
@@ -7,40 +6,6 @@
 #include "modbus_rtu_slave.h"
 
 
-
-//-----------------------------------------------------
-// Создает новую структуру struct modbus_rtu_slave и возвращает указатель
-//-----------------------------------------------------
-struct modbus_rtu_slave *ModBusRTU_Slave_Creat(
-    // Указатель на карту полей таблиц регистров
-    struct modbus_slave_registers_map_table *pRegistersMapTable,
-    // Размер приемо-передающего буфера
-    uint16_t SizeRxTxBuff)
-{
-    // pRegistersMapTable != NULL ?
-    if(pRegistersMapTable == NULL) return NULL;
-
-
-    // Указатель на экземпляр структуры modbus_rtu_slave
-    struct modbus_rtu_slave *pModBusRTU_Slave;
-    pModBusRTU_Slave = (struct modbus_rtu_slave *)calloc(1, sizeof(struct modbus_rtu_slave));
-
-    // pModBusRTU_Slave != NULL ?
-    if(pModBusRTU_Slave == NULL) return NULL;
-
-    // Указатель на приемопередающий буфер
-    uint8_t *pRxTxBuff;
-
-    pRxTxBuff = (uint8_t *)calloc(SizeRxTxBuff, sizeof(uint8_t));
-
-    // pRxTxBuff != NULL ?
-    if(pRxTxBuff == NULL) return NULL;
-
-    pModBusRTU_Slave->Registers_map.pRegistersMapTable = pRegistersMapTable;
-    pModBusRTU_Slave->pRxTxBuff = pRxTxBuff;
-
-    return pModBusRTU_Slave;
-}
 
 //-----------------------------------------------------
 // Инициализация ModBusRTU_Slave

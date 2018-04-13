@@ -1,6 +1,14 @@
 #ifndef MODBUS_CODE_FUNCTION
 #define MODBUS_CODE_FUNCTION
 
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+
 #define RETURN_HIGH(a)              (((a)>>8)&0xff)
 #define RETURN_LOW(a)               ((a)&0xff)
 #define RETURN_HIGH_AND_LOW(a, b)   (((a) << 8) | (b))
@@ -33,5 +41,13 @@ enum MB_EX {
     MB_EX_ILLEGAL_VALUE    = 0x03, // Output Value not in Range
     MB_EX_SLAVE_FAILURE    = 0x04, // Slave Deive Fails to process request
 };
+
+
+
+#ifdef __cplusplus
+}
+#endif //cpp
+
+
 
 #endif // MODBUS_CODE_FUNCTION

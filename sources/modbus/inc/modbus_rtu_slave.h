@@ -1,6 +1,14 @@
 #ifndef MODBUS_RTU_SLAVE
 #define MODBUS_RTU_SLAVE
 
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+
 // Размер входного/выходного буфера
 #define SIZE_UART_BUFFER	255
 
@@ -25,7 +33,6 @@ enum ERROR_INIT_MOBDUS_RTU_SLAVE {
     ERROR_pRegistersArray = 5,
     ERROR_pRxTxBuff = 6
 };
-
 
 /*
  * Нужно реализовать в phisic.
@@ -122,16 +129,6 @@ struct modbus_rtu_slave {
 
 
 
-// Создает новую структуру struct modbus_rtu_slave и возвращает указатель
-//-----------------------------------------------------
-struct modbus_rtu_slave *ModBusRTU_Slave_Creat(
-    // Указатель на карту полей таблиц регистров
-    struct modbus_slave_registers_map_table *pRegistersMapTable,
-    // Размер приемо-передающего буфера
-    uint16_t SizeRxTxBuff);
-
-
-
 // Инициализация ModBusRTU_Slave
 //-----------------------------------------------------
 void ModBusRTU_Slave_Init(
@@ -172,6 +169,14 @@ void ModBusRTU_Slave_Byte_Write(struct modbus_rtu_slave *pModBusRTU_Slave, uint8
 // Служба MODBUS RTU
 //-----------------------------------------------------
 void ModBusRTU_Slave_Service(struct modbus_rtu_slave *pModBusRTU_Slave);
+
+
+
+#ifdef __cplusplus
+}
+#endif //cpp
+
+
 
 #endif // MODBUS_RTU_SLAVE
 

@@ -1,6 +1,14 @@
 #ifndef MODBUS_FUNCTION
 #define MODBUS_FUNCTION
 
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+
 // Вернуть количество регистров в блоке
 #define MODBUS_SLAVE_FUNCTION_NUMBER_REGISTERS(pRX_BUFF)                ((*((pRX_BUFF) + 4) << 8) | *((pRX_BUFF) + 5))
 // Вернуть начальный номер регистра
@@ -27,6 +35,14 @@ uint8_t ModBus_0x10_Write_Multiple_Registers(struct modbus_slave_registers_map_t
 // Ответить исключением
 //------------------------------------------------------
 uint8_t ModBus_Exception_Response(uint8_t *pRxTxBuff, uint8_t Exception);
+
+
+
+#ifdef __cplusplus
+}
+#endif //cpp
+
+
 
 #endif // MODBUS_FUNCTION
 

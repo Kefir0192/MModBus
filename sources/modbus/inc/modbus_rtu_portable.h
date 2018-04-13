@@ -1,6 +1,14 @@
 #ifndef MODBUS_RTU_PORTABLE
 #define MODBUS_RTU_PORTABLE
 
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+
 // Частота работы МК
 #define FCY                 8000000
 // Частота инкрементирования счетчика таймера
@@ -66,6 +74,14 @@ void ModBusRTU_Slave_Timer_Init(void);                  // Инициализа�
 void ModBusRTU_Slave_Timer_Start(void);                 // Запустить таймер
 void ModBusRTU_Slave_Timer_Stop(void);                  // Стоп таймер
 */
+
+
+
+#ifdef __cplusplus
+}
+#endif //cpp
+
+
 
 #endif // MODBUS_RTU_PORTABLE
 

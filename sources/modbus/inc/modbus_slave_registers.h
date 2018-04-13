@@ -1,6 +1,14 @@
 #ifndef MODBUS_RTU_REGISTERS
 #define MODBUS_RTU_REGISTERS
 
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+
 /*
  * Здесь идут макросы определяющие карту регистров
  * Вся карта разделяется на подмассивы:
@@ -58,23 +66,6 @@ struct modbus_slave_registers_map_table {
 };
 
 
-// Создает карту таблиц регистров и возвращает указатель
-//-----------------------------------------------------
-struct modbus_slave_registers_map_table *ModBus_Slave_Creat_Registers_Map_Table(
-    // Число таблиц регистров
-    uint8_t NumRegistersTable);
-
-// Создает таблицу регистров и возвращает указатель
-//-----------------------------------------------------
-uint16_t *ModBus_Slave_Creat_Registers_Table(
-    // Таблицы регистров
-    struct modbus_slave_registers_table  *pRegistersTable,
-    // Доступ к регистрам
-    uint8_t  ACCESS,
-    // Стартовый адрес
-    uint16_t START_ADDR,
-    // Размер массива
-    uint16_t SIZE_ARR);
 
 // Инициализирует карту таблиц регистров
 //-----------------------------------------------------
@@ -113,6 +104,14 @@ void WrightModBusReg(struct modbus_slave_registers_map_table *pRegistersMapTable
 // возвращаемое значение - требуемое значение регистра ModBus
 //------------------------------------------------------
 uint16_t ReadModBusReg(struct modbus_slave_registers_map_table *pRegistersMapTable, uint16_t Address);
+
+
+
+#ifdef __cplusplus
+}
+#endif //cpp
+
+
 
 #endif // MODBUS_RTU_REGISTERS
 
