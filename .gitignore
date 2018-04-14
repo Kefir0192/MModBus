@@ -5,7 +5,7 @@
 *.obj
 *.elf
 *.depend
-!doc/src/*
+doc/src/*
 
 
 
