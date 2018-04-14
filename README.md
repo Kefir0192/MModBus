@@ -87,7 +87,7 @@ struct modbus_rtu_slave_function {
 ### Example
 Пример можно посмотреть ту: [MModBus/sources/example/](https://github.com/Kefir0192/MModBus/tree/master/sources/example)
 
-*Main:**
+**Main:**
 ```C
 struct modbus_rtu_slave ModBusRTU_Slave;
 struct modbus_slave_registers_table ModBusRTU_Slave_RegistersTable[2];
