@@ -167,5 +167,7 @@ endef
 define build_copy
     @echo [build_copy]: $@.bin
 	@$(OBJCOPY) $@.elf $@.bin -O binary
+	@echo [size]: $@.elf
+	@$(SIZE)  $@.elf
 endef
 	

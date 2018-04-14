@@ -114,7 +114,7 @@ uint8_t ModBus_0x10_Write_Multiple_Registers(struct modbus_slave_registers_map_t
     uint16_t starting_register_number = MODBUS_SLAVE_FUNCTION_STARTING_REGISTER_NUMBER(pRxTxBuff);
 
     for(uint8_t counter = 0; counter < number_registers; counter++) {
-        WrightModBusReg(pRegistersMapTable, MODBUS_SLAVE_FUNCTION_REGISTER_GET(pRxTxBuff, counter), starting_register_number + counter);
+        WriteModBusReg(pRegistersMapTable, MODBUS_SLAVE_FUNCTION_REGISTER_GET(pRxTxBuff, counter), starting_register_number + counter);
     }
 
     // return offset

@@ -50,7 +50,7 @@ void ModBus_Slave_Init_Registers_Table(
 // DataReg - собственно значение полученного по сети записываемого или запрошенного по сети читаемого регистра ModBus
 // Address - ModBus адрес этого регистра (не путать с локальным адресом ячейки памяти)
 //------------------------------------------------------
-void WrightModBusReg(struct modbus_slave_registers_map_table *pRegistersMapTable, uint16_t DataReg, uint16_t Address)
+void WriteModBusReg(struct modbus_slave_registers_map_table *pRegistersMapTable, uint16_t DataReg, uint16_t Address)
 {
     // pRegistersMapTable != NULL ?
     if(pRegistersMapTable == NULL) return;
