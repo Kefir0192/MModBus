@@ -4,6 +4,8 @@
 *.ko
 *.obj
 *.elf
+*.depend
+!doc/src/*
 
 
 
