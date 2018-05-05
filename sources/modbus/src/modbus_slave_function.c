@@ -84,8 +84,23 @@ uint8_t ModBus_0x06_Write_Single_Register(struct modbus_slave_registers_map_tabl
     if((pRegistersMapTable == NULL) || (pRxTxBuff == NULL)) return 0;
     uint8_t offset = 0;
 
+    //	Запрос:
+    //	+---0---+----1----+---------------2---------------+--------------3----------------+---------------4------------------+---------------5------------------+---6---+---7---+
+    //	| Адрес | Функция | Адрес регистра (старший байт) | Адрес регистра (младший байт) | Значение регистра (старший байт) | Значение регистра (младший байт) | CRC_L | CRC_H |
+    //	+-------+---------+-------------------------------+-------------------------------+----------------------------------+----------------------------------+-------+-------+
+
+    uint16_t starting_register_number = MODBUS_SLAVE_FUNCTION_STARTING_REGISTER_NUMBER(pRxTxBuff);
+    uint16_t value_reg = MODBUS_SLAVE_FUNCTION_NUMBER_REGISTERS(pRxTxBuff);
+
+    WriteModBusReg(pRegistersMapTable, value_reg, starting_register_number);
+
+    value_reg = ReadModBusReg(pRegistersMapTable, starting_register_number);
+
+    *(pRxTxBuff + 4) = RETURN_H(value_reg);
+    *(pRxTxBuff + 5) = RETURN_L(value_reg);
+
     // return offset
-    return offset;
+    return 6;
 }
 
 //------------------------------------------------------
