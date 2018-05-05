@@ -135,8 +135,8 @@ clean:
 
 
 
-.depend: cmd  = echo [depend]: $(var) &
-.depend: cmd += $(GCC) $(CFLAGS) -MT ".depend $(basename $(var)).o $(basename $(var))_$(DEBUG_SUFFIX).o"  -MM $(var) >> .depend &
+.depend: cmd  = echo [depend]: $(var) &&
+.depend: cmd += $(GCC) $(CFLAGS) -MT ".depend $(basename $(var)).o $(basename $(var))_$(DEBUG_SUFFIX).o"  -MM $(var) >> .depend;
 .depend:
 	-@$(RM) .depend
 	@$(foreach var, $(SOURCES), $(cmd))

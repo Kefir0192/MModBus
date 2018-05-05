@@ -82,7 +82,6 @@ uint8_t ModBus_0x06_Write_Single_Register(struct modbus_slave_registers_map_tabl
 {
     // pRegistersMapTable and pRxTxBuff != NULL ?
     if((pRegistersMapTable == NULL) || (pRxTxBuff == NULL)) return 0;
-    uint8_t offset = 0;
 
     //	Запрос:
     //	+---0---+----1----+---------------2---------------+--------------3----------------+---------------4------------------+---------------5------------------+---6---+---7---+
